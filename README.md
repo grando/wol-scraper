@@ -16,6 +16,7 @@ Small Python + Playwright CLI for scraping Watchtower Online Library pages.
 ```bash
 make build
 make start
+make host-install
 make test
 make run INPUT=sample-urls.txt OUTPUT=output.csv FORMAT=csv
 make run INPUT=sample-urls.txt FORMAT=json
@@ -36,3 +37,4 @@ make stop
 - Use `URL=...` with `make run` when you want to scrape a direct URL without a file.
 - Use `DEEP=...` only with `URL=...`.
 - Use `SHOW_BROWSER=1` only when the container can open a display.
+- Use `make host-install` only if you want to run the scraper outside Docker.
