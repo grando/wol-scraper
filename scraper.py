@@ -548,17 +548,58 @@ def combine_gdoc_cell(*values: str) -> str:
     return " ".join(parts)
 
 
+def transform_gems_note(text: str) -> str:
+    cleaned = normalize_text(text)
+    if not cleaned:
+        return ""
+    match = re.match(r"^\(([^)]*)\)", cleaned)
+    return f"({match.group(1)})" if match else ""
+
+
+def transform_song_number(text: str) -> str:
+    cleaned = normalize_text(text)
+    if not cleaned:
+        return ""
+    match = re.search(r"(\d+)", cleaned)
+    return match.group(1) if match else cleaned
+
+
+def transform_living_note(text: str) -> str:
+    cleaned = normalize_text(text)
+    if not cleaned:
+        return ""
+    period_index = cleaned.find(".")
+    if period_index < 0:
+        return cleaned
+    return cleaned[: period_index + 1].strip()
+
+
+def transform_study_note(text: str) -> str:
+    cleaned = normalize_text(text)
+    if not cleaned:
+        return ""
+    match = re.match(r"^\((\d+)\s*min\)\s*", cleaned)
+    if not match:
+        return cleaned
+    if match.group(1) == "30":
+        return cleaned
+    return normalize_text(cleaned[match.end():])
+
+
 def build_gdoc_tesori_row(row: dict[str, str]) -> list[str]:
     values = [""] * GDOC_TESORI_ROW_COLUMNS
-    values[4] = normalize_text(row.get("song_1", ""))
+    values[4] = transform_song_number(row.get("song_1", ""))
     values[8] = normalize_text(row.get("bible_chapters", ""))
     values[10] = normalize_text(row.get("treasures", ""))
-    values[13] = normalize_text(row.get("gems", ""))
-    values[17] = normalize_text(row.get("song_2", ""))
-    values[19] = combine_gdoc_cell(row.get("living_1", ""), row.get("living_1_note", ""))
-    values[22] = combine_gdoc_cell(row.get("living_2", ""), row.get("living_2_note", ""))
-    values[25] = normalize_text(row.get("study_material", ""))
-    values[29] = normalize_text(row.get("song_3", ""))
+    values[13] = combine_gdoc_cell(
+        row.get("gems", ""),
+        transform_gems_note(row.get("gems_notes", "")),
+    )
+    values[17] = transform_song_number(row.get("song_2", ""))
+    values[19] = combine_gdoc_cell(row.get("living_1", ""), transform_living_note(row.get("living_1_note", "")))
+    values[22] = combine_gdoc_cell(row.get("living_2", ""), transform_living_note(row.get("living_2_note", "")))
+    values[25] = transform_study_note(row.get("study_material", ""))
+    values[29] = transform_song_number(row.get("song_3", ""))
     return values
 
 
