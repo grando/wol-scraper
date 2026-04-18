@@ -1,19 +1,26 @@
-# Build the Docker image
+COMPOSE ?= docker compose
+INPUT ?= sample-urls.txt
+OUTPUT ?= output.csv
+
+.PHONY: build start stop up down shell run test clean
+
 build:
-	sudo docker compose build
+	$(COMPOSE) build
 
-# Start the container
-up:
-	sudo docker compose up
+start up:
+	$(COMPOSE) up -d
 
-# Stop and remove the container
-down:
-	sudo docker compose down
+stop down:
+	$(COMPOSE) down
 
-# Enter the container terminal
 shell:
-	sudo docker exec -it playwright_scraper /bin/bash
+	$(COMPOSE) exec scraper /bin/sh
 
-# Run the scraper inside the container
 run:
-	python scraper.py
+	$(COMPOSE) run --rm scraper python scraper.py --urls $(INPUT) --output $(OUTPUT)
+
+test:
+	$(COMPOSE) run --rm scraper python scraper.py --urls sample-urls.txt --output test-output.csv
+
+clean:
+	rm -f output.csv test-output.csv
