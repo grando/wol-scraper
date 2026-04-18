@@ -4,6 +4,7 @@ URL ?=
 OUTPUT ?= output.csv
 FORMAT ?= csv
 DEEP ?= 1
+SHOW_BROWSER ?= 0
 
 .DEFAULT_GOAL := help
 
@@ -15,7 +16,7 @@ help:
 	@echo "  make start       Start the container"
 	@echo "  make stop        Stop the container"
 	@echo "  make shell       Open a shell in the container"
-	@echo "  make run         Run the scraper with INPUT=$(INPUT) or URL=$(URL), OUTPUT=$(OUTPUT), FORMAT=$(FORMAT), DEEP=$(DEEP)"
+	@echo "  make run         Run the scraper with INPUT=$(INPUT) or URL=$(URL), OUTPUT=$(OUTPUT), FORMAT=$(FORMAT), DEEP=$(DEEP), SHOW_BROWSER=$(SHOW_BROWSER)"
 	@echo "  make test        Run the scraper against sample-urls.txt"
 	@echo "  make test-sample Run the scraper against sample-urls.txt"
 	@echo "  make clean       Remove generated CSV files"
@@ -35,15 +36,15 @@ shell:
 run:
 	@if [ -n "$(URL)" ]; then \
 		if [ -n "$(OUTPUT)" ]; then \
-			$(COMPOSE) run --rm scraper python scraper.py $(URL) --output $(OUTPUT) --format $(FORMAT) --deep $(DEEP); \
+			$(COMPOSE) run --rm scraper python scraper.py $(URL) --output $(OUTPUT) --format $(FORMAT) --deep $(DEEP) $(if $(filter 1 true yes,$(SHOW_BROWSER)),--show-browser,); \
 		else \
-			$(COMPOSE) run --rm scraper python scraper.py $(URL) --format $(FORMAT) --deep $(DEEP); \
+			$(COMPOSE) run --rm scraper python scraper.py $(URL) --format $(FORMAT) --deep $(DEEP) $(if $(filter 1 true yes,$(SHOW_BROWSER)),--show-browser,); \
 		fi; \
 	else \
 		if [ -n "$(OUTPUT)" ]; then \
-			$(COMPOSE) run --rm scraper python scraper.py --urls $(INPUT) --output $(OUTPUT) --format $(FORMAT); \
+			$(COMPOSE) run --rm scraper python scraper.py --urls $(INPUT) --output $(OUTPUT) --format $(FORMAT) $(if $(filter 1 true yes,$(SHOW_BROWSER)),--show-browser,); \
 		else \
-			$(COMPOSE) run --rm scraper python scraper.py --urls $(INPUT) --format $(FORMAT); \
+			$(COMPOSE) run --rm scraper python scraper.py --urls $(INPUT) --format $(FORMAT) $(if $(filter 1 true yes,$(SHOW_BROWSER)),--show-browser,); \
 		fi; \
 	fi
 

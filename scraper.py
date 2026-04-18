@@ -344,12 +344,16 @@ async def scrape_url(page, url: str) -> dict[str, str]:
     return row
 
 
-async def crawl(urls: list[str]) -> list[dict[str, str]]:
+async def launch_browser(playwright, show_browser: bool):
+    return await playwright.chromium.launch(
+        headless=not show_browser,
+        args=["--no-sandbox", "--disable-dev-shm-usage"],
+    )
+
+
+async def crawl(urls: list[str], show_browser: bool) -> list[dict[str, str]]:
     async with async_playwright() as playwright:
-        browser = await playwright.chromium.launch(
-            headless=True,
-            args=["--no-sandbox", "--disable-dev-shm-usage"],
-        )
+        browser = await launch_browser(playwright, show_browser)
         context = await browser.new_context(user_agent=USER_AGENT)
 
         rows = []
@@ -366,12 +370,9 @@ async def crawl(urls: list[str]) -> list[dict[str, str]]:
     return rows
 
 
-async def crawl_deep(start_url: str, depth: int) -> list[dict[str, str]]:
+async def crawl_deep(start_url: str, depth: int, show_browser: bool) -> list[dict[str, str]]:
     async with async_playwright() as playwright:
-        browser = await playwright.chromium.launch(
-            headless=True,
-            args=["--no-sandbox", "--disable-dev-shm-usage"],
-        )
+        browser = await launch_browser(playwright, show_browser)
         context = await browser.new_context(user_agent=USER_AGENT)
 
         rows = []
@@ -426,6 +427,11 @@ def parse_args() -> argparse.Namespace:
         default=1,
         help="Number of linked pages to parse for a single direct URL (1-50, default: 1).",
     )
+    parser.add_argument(
+        "--show-browser",
+        action="store_true",
+        help="Open Playwright in headed mode when a display is available.",
+    )
     return parser.parse_args()
 
 
@@ -479,11 +485,11 @@ def main() -> None:
 
     if args.deep > 1:
         start_url = collect_direct_url(args)
-        rows = asyncio.run(crawl_deep(start_url, args.deep))
+        rows = asyncio.run(crawl_deep(start_url, args.deep, args.show_browser))
         rows_to_write = rows
     else:
         urls = collect_urls(args)
-        rows = asyncio.run(crawl(urls))
+        rows = asyncio.run(crawl(urls, args.show_browser))
         rows_to_write = [row for row in rows if is_valid_row(row)]
 
     skipped = sum(1 for row in rows if not is_valid_row(row))

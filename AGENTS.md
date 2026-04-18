@@ -70,6 +70,7 @@ This repository is a small Python Playwright CLI for scraping Watchtower Online 
 - The CLI can also accept one or more direct URLs when `--urls` is omitted.
 - Output defaults to CSV and can also be JSON when the CLI `--format json` option is used.
 - If `--output` is omitted, the result is written to stdout.
+- `--show-browser` is an optional flag that opens Playwright in headed mode when a display is available.
 - Pages missing `section_1`, `section_2`, or `section_3` should be skipped, and the CLI should report how many URLs were skipped.
 - `--deep` is only valid for a single direct URL, accepts values from 1 to 50, and follows `next_week_page` links.
 - Deep mode should keep the parsed URL chain in output and mark each page with a validity flag.
