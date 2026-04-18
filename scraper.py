@@ -126,6 +126,19 @@ PAGE_RULES = [
                 "direction": "next",
             },
         ],
+        "section_groups": [
+            {
+                "anchor_text": "EFFICACI NEL MINISTERO",
+                "prefix": "ministry",
+                "max_items": 5,
+            },
+            {
+                "anchor_text": "VITA CRISTIANA",
+                "prefix": "living",
+                "max_items": 4,
+                "stop_title_contains": "Studio biblico di congregazione",
+            },
+        ],
     },
     {
         "name": "meeting_page_202026164",
@@ -236,6 +249,19 @@ PAGE_RULES = [
                 "direction": "next",
             },
         ],
+        "section_groups": [
+            {
+                "anchor_text": "EFFICACI NEL MINISTERO",
+                "prefix": "ministry",
+                "max_items": 5,
+            },
+            {
+                "anchor_text": "VITA CRISTIANA",
+                "prefix": "living",
+                "max_items": 4,
+                "stop_title_contains": "Studio biblico di congregazione",
+            },
+        ],
     },
     {
         "name": "meeting_page_generic",
@@ -311,7 +337,48 @@ PAGE_RULES = [
                 "direction": "next",
             },
         ],
+        "section_groups": [],
     }
+]
+
+CSV_FIELD_ORDER = [
+    "source_url",
+    "week",
+    "bible_chapters",
+    "song_1",
+    "section_1",
+    "treasures",
+    "gems",
+    "gems_notes",
+    "reading",
+    "reading_material",
+    "section_2",
+    "ministry_1",
+    "ministry_1_note",
+    "ministry_2",
+    "ministry_2_note",
+    "ministry_3",
+    "ministry_3_note",
+    "ministry_4",
+    "ministry_4_note",
+    "ministry_5",
+    "ministry_5_note",
+    "section_3",
+    "living_1",
+    "living_1_note",
+    "living_2",
+    "living_2_note",
+    "living_3",
+    "living_3_note",
+    "living_4",
+    "living_4_note",
+    "song_2",
+    "song_3",
+    "study",
+    "study_material",
+    "prev_week_page",
+    "next_week_page",
+    "error",
 ]
 
 
@@ -452,34 +519,104 @@ async def extract_following_text(locator) -> str:
 
     text = await element.evaluate(
         """(node) => {
-            const looksLikeTitle = (value) => {
-                const text = value.trim();
-                return text
-                    && text.length <= 80
-                    && !text.startsWith('(')
-                    && text === text.toUpperCase();
-            };
-            const parts = [];
-            let current = node.nextElementSibling;
-            while (current) {
+            const nodes = [...document.querySelectorAll('[id^="p"], [id^="tt"]')];
+            const startIndex = nodes.findIndex((item) => item.id === node.id);
+            if (startIndex < 0) {
+                return '';
+            }
+            for (let index = startIndex + 1; index < nodes.length; index += 1) {
+                const current = nodes[index];
                 if (/^H[1-6]$/.test(current.tagName)) {
                     break;
                 }
                 const clone = current.cloneNode(true);
                 clone.querySelectorAll('.dc-screenReaderText').forEach((item) => item.remove());
                 const value = (clone.innerText || clone.textContent || '').replace(/\\s+/g, ' ').trim();
-                if (value && looksLikeTitle(value)) {
-                    break;
-                }
                 if (value) {
-                    parts.push(value);
+                    return value;
                 }
-                current = current.nextElementSibling;
             }
-            return parts.join(' ').replace(/\\s+/g, ' ').trim();
+            return '';
         }"""
     )
     return normalize_text(text or "")
+
+
+async def extract_section_group(page, group: dict) -> list[dict[str, str]]:
+    heading_locator = page.locator("h2").filter(has_text=group["anchor_text"]).first
+    if await heading_locator.count() == 0:
+        return []
+
+    heading = await heading_locator.element_handle()
+    if not heading:
+        return []
+
+    items = await heading.evaluate(
+        """(node, config) => {
+            const clean = (value) => (value || '').replace(/\\s+/g, ' ').trim();
+            const textFrom = (current) => {
+                const clone = current.cloneNode(true);
+                clone.querySelectorAll('.dc-screenReaderText').forEach((item) => item.remove());
+                return clean(clone.innerText || clone.textContent || '');
+            };
+            const nodes = [...document.querySelectorAll('[id^="p"], [id^="tt"]')];
+            const startIndex = nodes.findIndex((item) => item.id === node.id);
+            const nextBlockText = (currentId) => {
+                const currentIndex = nodes.findIndex((item) => item.id === currentId);
+                if (currentIndex < 0) {
+                    return '';
+                }
+                for (let index = currentIndex + 1; index < nodes.length; index += 1) {
+                    const sibling = nodes[index];
+                    if (/^H[1-6]$/.test(sibling.tagName)) {
+                        return '';
+                    }
+                    const value = textFrom(sibling);
+                    if (value) {
+                        return value;
+                    }
+                }
+                return '';
+            };
+
+            const items = [];
+            if (startIndex < 0) {
+                return items;
+            }
+            for (let index = startIndex + 1; index < nodes.length; index += 1) {
+                const current = nodes[index];
+                if (current.tagName === 'H2') {
+                    break;
+                }
+                if (current.tagName === 'H3') {
+                    const title = textFrom(current);
+                    if (title) {
+                        items.push({ title, note: nextBlockText(current.id) });
+                        if (config.stopTitleContains && title.includes(config.stopTitleContains)) {
+                            break;
+                        }
+                        if (items.length >= config.maxItems) {
+                            break;
+                        }
+                    }
+                }
+            }
+            return items;
+        }""",
+        {
+            "maxItems": group["max_items"],
+            "stopTitleContains": group.get("stop_title_contains", ""),
+        },
+    )
+
+    return [
+        {
+            "title": normalize_text(item.get("title", "")),
+            "note": normalize_text(item.get("note", "")),
+        }
+        for item in items
+        if normalize_text(item.get("title", ""))
+    ]
 
 
 def fallback_field_value(url: str, field: dict, state: dict) -> str:
@@ -571,7 +708,8 @@ async def extract_field(page, field: dict, state: dict) -> str:
 
 async def scrape_url(page, url: str) -> dict[str, str]:
     rule = select_rule(url)
-    row = {"source_url": url, **{field["name"]: "" for field in rule["fields"]}, "error": ""}
+    row = {name: "" for name in CSV_FIELD_ORDER}
+    row["source_url"] = url
 
     try:
         await page.goto(url, wait_until="commit", timeout=NAVIGATION_TIMEOUT_MS)
@@ -586,6 +724,14 @@ async def scrape_url(page, url: str) -> dict[str, str]:
         state = await collect_page_state(page)
         for field in rule["fields"]:
             row[field["name"]] = await extract_field(page, field, state)
+        for group in rule.get("section_groups", []):
+            items = await extract_section_group(page, group)
+            for index in range(group["max_items"]):
+                item_name = f'{group["prefix"]}_{index + 1}'
+                note_name = f'{group["prefix"]}_{index + 1}_note'
+                if index < len(items):
+                    row[item_name] = items[index]["title"]
+                    row[note_name] = items[index]["note"]
     except Exception as exc:  # noqa: BLE001
         row["error"] = str(exc)
 
@@ -611,23 +757,10 @@ async def crawl(urls: list[str], output_path: Path) -> None:
         await browser.close()
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    fieldnames = ["source_url", *ordered_fieldnames(), "error"]
     with output_path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer = csv.DictWriter(handle, fieldnames=CSV_FIELD_ORDER)
         writer.writeheader()
         writer.writerows(rows)
-
-
-def ordered_fieldnames() -> list[str]:
-    names = []
-    seen = set()
-    for rule in PAGE_RULES:
-        for field in rule["fields"]:
-            name = field["name"]
-            if name not in seen:
-                names.append(name)
-                seen.add(name)
-    return names
 
 
 def parse_args() -> argparse.Namespace:

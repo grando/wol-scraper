@@ -19,6 +19,8 @@ Applied decisions for the current scraper behavior:
 - Try a page-specific xpath map first, then fall back to semantic extraction from rendered page text.
 - For text fields, try xpath extraction first and then parse the rendered text when the xpath is absent or broken.
 - For link fields, try xpath extraction first and then derive the page URL from the current week id when the link is not exposed in the live tree.
+- For variable section groups, keep fixed-width columns up to the documented maximum and leave missing slots empty.
+- For note fields, use the first non-heading block immediately after the item heading.
 - Use `commit` navigation on WOL pages and wait for the rendered text to become available before extraction.
 - Use a fresh Playwright page per URL so one failed or redirected page does not leak state into the next one.
 - Keep lightweight CLI progress output during scraping.
@@ -49,7 +51,8 @@ Observed shape:
 - The main content is a meeting/program page with an `h1` heading.
 - The page contains multiple section headings and link-heavy blocks.
 - The page includes useful text in the visible body, even when specific container selectors are inconsistent.
-- The later-life study block sits at `p45` on this variant, not at the same anchor used by the later-week page.
+- The `EFFICACI NEL MINISTERO` section has up to three numbered items on this variant.
+- The `VITA CRISTIANA` section has a song item, one ministry/life item, the study block, and then closing comments.
 
 What matters for extraction:
 - Use the page URL as the primary identifier.
@@ -57,6 +60,10 @@ What matters for extraction:
 - Keep the field names stable even when xpaths change on another page case.
 - Do not rely on one brittle selector such as a single `div` class.
 - For page-specific fields, use xpath rules stored in this document and update them when a new case changes the structure.
+- Keep the ministry and living subsection columns fixed-width:
+  - `ministry_1`..`ministry_5` plus matching `_note` fields
+  - `living_1`..`living_4` plus matching `_note` fields
+- Stop living subsection extraction at `Studio biblico di congregazione` and do not include the closing comments block.
 
 Current scraper behavior:
 - Navigate with Playwright using a browser context.
@@ -103,6 +110,21 @@ Use these xpaths for the current example page only. They may change for the next
 - `prev_week_page` -> `//*[@id="publicationNavigation"]/div[3]/ul/li[1]/a`
 - `next_week_page` -> `//*[@id="publicationNavigation"]/div[3]/ul/li[2]/a`
 
+Case 1 section groups:
+- `ministry_1` -> `4. Iniziare una conversazione`
+- `ministry_2` -> `5. Iniziare una conversazione`
+- `ministry_3` -> `6. Discorso`
+- `ministry_4` -> empty
+- `ministry_5` -> empty
+- `living_1` -> `Cantico 80`
+- `living_2` -> `8. Ti perderai qualcosa?`
+- `living_3` -> `9. Studio biblico di congregazione`
+- `living_4` -> empty
+
+Notes:
+- The note fields use the first text block after the item heading, such as `tt33`, `tt35`, `tt37`, `tt45`, or `tt55`.
+- The exact note node may be a `DIV` or a `P`, but the extracted text should stay the same.
+
 Generic rule:
 - Keep the scraper data-driven.
 - Define a page case as a list of field names and xpaths.
@@ -119,16 +141,19 @@ Observed shape:
 - The page keeps the same overall structure as Case 1.
 - `week`, `bible_chapters`, and section headings still match the same semantic positions.
 - The page also exposes the `treasures`, `gems`, `reading`, and `study` blocks as direct heading anchors.
-- The note/material fields are the text that follows those headings until the next section heading.
+- The note/material fields are the first text block immediately after those headings.
 - The song fields are exposed as `strong` text in body order rather than always appearing at the old song xpaths.
 - The navigation links are still present, but the ids for the old song xpaths can be absent.
+- The `EFFICACI NEL MINISTERO` section has four numbered items on this variant.
+- The `VITA CRISTIANA` section still stops at the study block before the closing comments.
 
 What matters for extraction:
 - Reuse the same field names.
 - Reuse the same section-heading xpaths where they still match.
 - Use ordered `Cantico` strong text as the generic fallback for songs when the exact xpath is missing.
 - Keep previous/next page links as absolute URLs.
-- Use the heading xpath as the anchor for `following_text` fields and stop before the next heading-like block.
+- Use the heading xpath as the anchor for `following_text` fields and stop at the first non-heading block.
+- Keep the ministry and living subsection columns fixed-width and empty-fill the missing slots.
 
 Case 2 field map:
 - `week` -> `//*[@id="p1"]`
@@ -148,6 +173,21 @@ Case 2 field map:
 - `song_3` -> generic `Cantico` strong fallback, third match
 - `prev_week_page` -> `//*[@id="publicationNavigation"]/div[3]/ul/li[1]/a`
 - `next_week_page` -> `//*[@id="publicationNavigation"]/div[3]/ul/li[2]/a`
+
+Case 2 section groups:
+- `ministry_1` -> `4. Iniziare una conversazione`
+- `ministry_2` -> `5. Iniziare una conversazione`
+- `ministry_3` -> `6. Iniziare una conversazione`
+- `ministry_4` -> `7. Spiegare quello in cui si crede`
+- `ministry_5` -> empty
+- `living_1` -> `Cantico 80`
+- `living_2` -> `8. Ti perderai qualcosa?`
+- `living_3` -> `9. Studio biblico di congregazione`
+- `living_4` -> empty
+
+Notes:
+- The note fields use the first text block after the item heading, such as `tt33`, `tt35`, `tt37`, `tt39`, `tt45`, or `tt55`.
+- The exact note node may be a `DIV` or a `P`, but the extracted text should stay the same.
 
 Regression checks:
 - Case 2 must still populate all requested fields.

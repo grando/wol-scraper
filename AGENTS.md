@@ -60,6 +60,7 @@ This repository is a small Python Playwright CLI for scraping Watchtower Online 
 - Prefer a single entrypoint in `scraper.py`.
 - Keep extraction logic easy to update when the final fields are identified.
 - When a field is a block of text that follows a heading, model it as a heading anchor plus a `following_text` extraction rule and record the stop boundary in `parsing-rules.md`.
+- For variable section groups, keep the CSV schema fixed-width with empty placeholders for missing slots, and stop the living group at `Studio biblico di congregazione`.
 - If a user-supplied xpath sketch does not match the live DOM, verify the corrected anchor on the page and record the corrected xpath in `parsing-rules.md` before changing the scraper.
 - For page extraction, prefer Playwright-native APIs first. Only add separate HTML parsing logic, or a combination approach, when a documented page case requires it.
 - Input files are plain text with one URL per line.
