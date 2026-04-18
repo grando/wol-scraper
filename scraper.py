@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 from urllib.parse import urljoin
 
-from playwright.async_api import TimeoutError, async_playwright
+from playwright.async_api import async_playwright
 
 
 USER_AGENT = (
@@ -17,331 +17,6 @@ USER_AGENT = (
 )
 NAVIGATION_TIMEOUT_MS = 120000
 FIELD_READY_TIMEOUT_MS = 60000
-
-PAGE_RULES = [
-    {
-        "name": "meeting_page_202026161",
-        "url_pattern": re.compile(r"^https://wol\.jw\.org/it/wol/d/r6/lp-i/202026161$"),
-        "ready_xpath": '//*[@id="p1"]',
-        "fields": [
-            {
-                "name": "week",
-                "xpath": '//*[@id="p1"]',
-                "kind": "text",
-                "fallback": "title_prefix",
-            },
-            {
-                "name": "bible_chapters",
-                "xpath": '//*[@id="p2"]',
-                "kind": "text",
-                "fallback": "scripture_link",
-            },
-            {
-                "name": "song_1",
-                "xpath": '//*[@id="p3"]/a/strong',
-                "kind": "text",
-                "fallback": "cantico_index",
-                "fallback_index": 0,
-            },
-            {
-                "name": "treasures",
-                "xpath": '//*[@id="p5"]/strong',
-                "kind": "text",
-            },
-            {
-                "name": "gems",
-                "xpath": '//*[@id="p11"]/strong',
-                "kind": "text",
-            },
-            {
-                "name": "gems_notes",
-                "xpath": '//*[@id="p11"]',
-                "kind": "following_text",
-            },
-            {
-                "name": "reading",
-                "xpath": '//*[@id="p17"]',
-                "kind": "text",
-            },
-            {
-                "name": "reading_material",
-                "xpath": '//*[@id="p17"]',
-                "kind": "following_text",
-            },
-            {
-                "name": "section_1",
-                "xpath": '//*[@id="p4"]/strong',
-                "kind": "text",
-                "fallback": "heading_index",
-                "fallback_index": 0,
-            },
-            {
-                "name": "section_2",
-                "xpath": '//*[@id="p19"]/strong',
-                "kind": "text",
-                "fallback": "heading_index",
-                "fallback_index": 1,
-            },
-            {
-                "name": "section_3",
-                "xpath": '//*[@id="p26"]/strong',
-                "kind": "text",
-                "fallback": "heading_index",
-                "fallback_index": 2,
-            },
-            {
-                "name": "song_2",
-                "xpath": '//*[@id="p27"]/a/strong',
-                "kind": "text",
-                "fallback": "cantico_index",
-                "fallback_index": 1,
-            },
-            {
-                "name": "song_3",
-                "xpath": '//*[@id="p47"]/span[2]/a/strong',
-                "kind": "text",
-                "fallback": "cantico_index",
-                "fallback_index": 2,
-            },
-            {
-                "name": "study",
-                "xpath": '//*[@id="p45"]/strong',
-                "kind": "text",
-            },
-            {
-                "name": "study_material",
-                "xpath": '//*[@id="p45"]',
-                "kind": "following_text",
-            },
-            {
-                "name": "prev_week_page",
-                "xpath": '//*[@id="publicationNavigation"]/div[3]/ul/li[1]/a',
-                "kind": "href",
-                "fallback": "adjacent_page_link",
-                "direction": "prev",
-            },
-            {
-                "name": "next_week_page",
-                "xpath": '//*[@id="publicationNavigation"]/div[3]/ul/li[2]/a',
-                "kind": "href",
-                "fallback": "adjacent_page_link",
-                "direction": "next",
-            },
-        ],
-        "section_groups": [
-            {
-                "anchor_text": "EFFICACI NEL MINISTERO",
-                "prefix": "ministry",
-                "max_items": 5,
-            },
-            {
-                "anchor_text": "VITA CRISTIANA",
-                "prefix": "living",
-                "max_items": 4,
-                "stop_title_contains": "Studio biblico di congregazione",
-            },
-        ],
-    },
-    {
-        "name": "meeting_page_202026164",
-        "url_pattern": re.compile(r"^https://wol\.jw\.org/it/wol/d/r6/lp-i/202026164$"),
-        "ready_xpath": '//*[@id="p1"]',
-        "fields": [
-            {
-                "name": "week",
-                "xpath": '//*[@id="p1"]',
-                "kind": "text",
-                "fallback": "title_prefix",
-            },
-            {
-                "name": "bible_chapters",
-                "xpath": '//*[@id="p2"]',
-                "kind": "text",
-                "fallback": "scripture_link",
-            },
-            {
-                "name": "song_1",
-                "xpath": '//*[@id="p3"]/a/strong',
-                "kind": "text",
-                "fallback": "cantico_index",
-                "fallback_index": 0,
-            },
-            {
-                "name": "treasures",
-                "xpath": '//*[@id="p5"]/strong',
-                "kind": "text",
-            },
-            {
-                "name": "gems",
-                "xpath": '//*[@id="p11"]/strong',
-                "kind": "text",
-            },
-            {
-                "name": "gems_notes",
-                "xpath": '//*[@id="p11"]',
-                "kind": "following_text",
-            },
-            {
-                "name": "reading",
-                "xpath": '//*[@id="p17"]',
-                "kind": "text",
-            },
-            {
-                "name": "reading_material",
-                "xpath": '//*[@id="p17"]',
-                "kind": "following_text",
-            },
-            {
-                "name": "section_1",
-                "xpath": '//*[@id="p4"]/strong',
-                "kind": "text",
-                "fallback": "heading_index",
-                "fallback_index": 0,
-            },
-            {
-                "name": "section_2",
-                "xpath": '//*[@id="p19"]/strong',
-                "kind": "text",
-                "fallback": "heading_index",
-                "fallback_index": 1,
-            },
-            {
-                "name": "section_3",
-                "xpath": '//*[@id="p26"]/strong',
-                "kind": "text",
-                "fallback": "heading_index",
-                "fallback_index": 2,
-            },
-            {
-                "name": "study",
-                "xpath": '//*[@id="p37"]/strong',
-                "kind": "text",
-            },
-            {
-                "name": "study_material",
-                "xpath": '//*[@id="p37"]',
-                "kind": "following_text",
-            },
-            {
-                "name": "song_2",
-                "xpath": '//*[@id="p27"]/a/strong',
-                "kind": "text",
-                "fallback": "cantico_index",
-                "fallback_index": 1,
-            },
-            {
-                "name": "song_3",
-                "xpath": '//*[@id="p47"]/span[2]/a/strong',
-                "kind": "text",
-                "fallback": "cantico_index",
-                "fallback_index": 2,
-            },
-            {
-                "name": "prev_week_page",
-                "xpath": '//*[@id="publicationNavigation"]/div[3]/ul/li[1]/a',
-                "kind": "href",
-                "fallback": "adjacent_page_link",
-                "direction": "prev",
-            },
-            {
-                "name": "next_week_page",
-                "xpath": '//*[@id="publicationNavigation"]/div[3]/ul/li[2]/a',
-                "kind": "href",
-                "fallback": "adjacent_page_link",
-                "direction": "next",
-            },
-        ],
-        "section_groups": [
-            {
-                "anchor_text": "EFFICACI NEL MINISTERO",
-                "prefix": "ministry",
-                "max_items": 5,
-            },
-            {
-                "anchor_text": "VITA CRISTIANA",
-                "prefix": "living",
-                "max_items": 4,
-                "stop_title_contains": "Studio biblico di congregazione",
-            },
-        ],
-    },
-    {
-        "name": "meeting_page_generic",
-        "url_pattern": re.compile(r"^https://wol\.jw\.org/it/wol/d/r6/lp-i/\d+$"),
-        "ready_xpath": '//*[@id="p1"]',
-        "fields": [
-            {
-                "name": "week",
-                "xpath": '//*[@id="p1"]',
-                "kind": "text",
-                "fallback": "title_prefix",
-            },
-            {
-                "name": "bible_chapters",
-                "xpath": '//*[@id="p2"]',
-                "kind": "text",
-                "fallback": "scripture_link",
-            },
-            {
-                "name": "song_1",
-                "xpath": '//*[@id="p3"]/a/strong',
-                "kind": "text",
-                "fallback": "cantico_index",
-                "fallback_index": 0,
-            },
-            {
-                "name": "section_1",
-                "xpath": '//*[@id="p4"]/strong',
-                "kind": "text",
-                "fallback": "heading_index",
-                "fallback_index": 0,
-            },
-            {
-                "name": "section_2",
-                "xpath": '//*[@id="p19"]/strong',
-                "kind": "text",
-                "fallback": "heading_index",
-                "fallback_index": 1,
-            },
-            {
-                "name": "section_3",
-                "xpath": '//*[@id="p26"]/strong',
-                "kind": "text",
-                "fallback": "heading_index",
-                "fallback_index": 2,
-            },
-            {
-                "name": "song_2",
-                "xpath": '//*[@id="p27"]/a/strong',
-                "kind": "text",
-                "fallback": "cantico_index",
-                "fallback_index": 1,
-            },
-            {
-                "name": "song_3",
-                "xpath": '//*[@id="p47"]/span[2]/a/strong',
-                "kind": "text",
-                "fallback": "cantico_index",
-                "fallback_index": 2,
-            },
-            {
-                "name": "prev_week_page",
-                "xpath": '//*[@id="publicationNavigation"]/div[3]/ul/li[1]/a',
-                "kind": "href",
-                "fallback": "adjacent_page_link",
-                "direction": "prev",
-            },
-            {
-                "name": "next_week_page",
-                "xpath": '//*[@id="publicationNavigation"]/div[3]/ul/li[2]/a',
-                "kind": "href",
-                "fallback": "adjacent_page_link",
-                "direction": "next",
-            },
-        ],
-        "section_groups": [],
-    }
-]
 
 CSV_FIELD_ORDER = [
     "source_url",
@@ -397,13 +72,6 @@ def normalize_text(text: str) -> str:
     return " ".join(text.split()).strip()
 
 
-def select_rule(url: str) -> dict:
-    for rule in PAGE_RULES:
-        if rule["url_pattern"].match(url):
-            return rule
-    return PAGE_RULES[0]
-
-
 def title_prefix(title: str) -> str:
     for separator in (" — ", " - ", " | "):
         if separator in title:
@@ -411,7 +79,7 @@ def title_prefix(title: str) -> str:
     return normalize_text(title)
 
 
-async def collect_page_state(page) -> dict:
+async def collect_page_links(page) -> list[dict[str, str]]:
     links = []
     link_locator = page.locator("a")
     link_count = await link_locator.count()
@@ -434,283 +102,201 @@ async def collect_page_state(page) -> dict:
                 "href": normalize_text(href or ""),
             }
         )
-
-    strongs = []
-    strong_locator = page.locator("strong")
-    strong_count = await strong_locator.count()
-    for index in range(strong_count):
-        element = strong_locator.nth(index)
-        try:
-            text = await element.inner_text(timeout=1000)
-        except Exception:  # noqa: BLE001
-            text = ""
-        if not text:
-            try:
-                text = await element.text_content(timeout=1000)
-            except Exception:  # noqa: BLE001
-                text = ""
-        strongs.append(
-            {
-                "index": index,
-                "text": normalize_text(text or ""),
-            }
-        )
-
-    headings = []
-    heading_locator = page.locator("h3")
-    heading_count = await heading_locator.count()
-    for index in range(heading_count):
-        element = heading_locator.nth(index)
-        try:
-            text = await element.inner_text(timeout=1000)
-        except Exception:  # noqa: BLE001
-            text = ""
-        if not text:
-            try:
-                text = await element.text_content(timeout=1000)
-            except Exception:  # noqa: BLE001
-                text = ""
-        headings.append({"index": index, "text": normalize_text(text or ""), "level": 3})
-
-    return {"title": await page.title(), "links": links, "strongs": strongs, "headings": headings}
+    return links
 
 
-def pick_link_texts(links: list[dict], pattern: re.Pattern[str]) -> list[str]:
-    return [normalize_text(link["text"]) for link in links if pattern.search(normalize_text(link["text"]))]
-
-
-def pick_semantic_links(links: list[dict]) -> list[dict]:
-    blocked_prefixes = (
-        "Cantico",
-        "mwb",
-        "lmd",
-        "th",
-        "w0",
-        "it ",
-        "Pubblicazioni",
-        "Italiano",
-        "Condividi",
-        "Impostazioni",
-        "Accedi",
-        "Disconnetti",
-        "JW.ORG",
-        "BIBLIOTECA ONLINE",
-        "Guardar",
-    )
-    return [
-        link
-        for link in links
-        if link["text"]
-        and len(link["text"]) > 2
-        and not link["text"].startswith(blocked_prefixes)
-    ]
-
-
-def pick_cantico_texts(strongs: list[dict]) -> list[str]:
-    matches = []
-    for strong in strongs:
-        text = normalize_text(strong.get("text", ""))
-        if re.match(r"^Cantico\s+\d+", text):
-            matches.append(text)
-    return matches
-
-
-async def extract_following_text(locator) -> str:
-    element = await locator.element_handle()
-    if not element:
+def adjacent_page_link(url: str, links: list[dict[str, str]], direction: str) -> str:
+    current_match = re.search(r"/(\d+)$", url)
+    if not current_match:
         return ""
 
-    text = await element.evaluate(
-        """(node) => {
-            const nodes = [...document.querySelectorAll('[id^="p"], [id^="tt"]')];
-            const startIndex = nodes.findIndex((item) => item.id === node.id);
-            if (startIndex < 0) {
-                return '';
-            }
-            for (let index = startIndex + 1; index < nodes.length; index += 1) {
-                const current = nodes[index];
-                if (/^H[1-6]$/.test(current.tagName)) {
-                    break;
-                }
-                const clone = current.cloneNode(true);
-                clone.querySelectorAll('.dc-screenReaderText').forEach((item) => item.remove());
-                const value = (clone.innerText || clone.textContent || '').replace(/\\s+/g, ' ').trim();
-                if (value) {
-                    return value;
-                }
-            }
-            return '';
-        }"""
-    )
-    return normalize_text(text or "")
+    current_id = int(current_match.group(1))
+    candidates = []
+    for link in links:
+        href = link.get("href") or ""
+        match = re.search(r"/(\d+)$", href)
+        if not match:
+            continue
+        page_id = int(match.group(1))
+        if page_id == current_id:
+            continue
+        candidates.append((page_id, href))
 
-
-async def extract_section_group(page, group: dict) -> list[dict[str, str]]:
-    heading_locator = page.locator("h2").filter(has_text=group["anchor_text"]).first
-    if await heading_locator.count() == 0:
-        return []
-
-    heading = await heading_locator.element_handle()
-    if not heading:
-        return []
-
-    items = await heading.evaluate(
-        """(node, config) => {
-            const clean = (value) => (value || '').replace(/\\s+/g, ' ').trim();
-            const textFrom = (current) => {
-                const clone = current.cloneNode(true);
-                clone.querySelectorAll('.dc-screenReaderText').forEach((item) => item.remove());
-                return clean(clone.innerText || clone.textContent || '');
-            };
-            const nodes = [...document.querySelectorAll('[id^="p"], [id^="tt"]')];
-            const startIndex = nodes.findIndex((item) => item.id === node.id);
-            const nextBlockText = (currentId) => {
-                const currentIndex = nodes.findIndex((item) => item.id === currentId);
-                if (currentIndex < 0) {
-                    return '';
-                }
-                for (let index = currentIndex + 1; index < nodes.length; index += 1) {
-                    const sibling = nodes[index];
-                    if (/^H[1-6]$/.test(sibling.tagName)) {
-                        return '';
-                    }
-                    const value = textFrom(sibling);
-                    if (value) {
-                        return value;
-                    }
-                }
-                return '';
-            };
-
-            const items = [];
-            if (startIndex < 0) {
-                return items;
-            }
-            for (let index = startIndex + 1; index < nodes.length; index += 1) {
-                const current = nodes[index];
-                if (current.tagName === 'H2') {
-                    break;
-                }
-                if (current.tagName === 'H3') {
-                    const title = textFrom(current);
-                    if (title) {
-                        items.push({ title, note: nextBlockText(current.id) });
-                        if (config.stopTitleContains && title.includes(config.stopTitleContains)) {
-                            break;
-                        }
-                        if (items.length >= config.maxItems) {
-                            break;
-                        }
-                    }
-                }
-            }
-            return items;
-        }""",
-        {
-            "maxItems": group["max_items"],
-            "stopTitleContains": group.get("stop_title_contains", ""),
-        },
-    )
-
-    return [
-        {
-            "title": normalize_text(item.get("title", "")),
-            "note": normalize_text(item.get("note", "")),
-        }
-        for item in items
-        if normalize_text(item.get("title", ""))
-    ]
-
-
-def fallback_field_value(url: str, field: dict, state: dict) -> str:
-    fallback = field.get("fallback")
-    if fallback == "title_prefix":
-        return title_prefix(state.get("title", ""))
-
-    if fallback == "heading_index":
-        index = field.get("fallback_index", 0)
-        headings = [
-            normalize_text(item["text"])
-            for item in state.get("headings", [])
-            if item.get("level") == 3 and normalize_text(item["text"])
-        ]
-        if 0 <= index < len(headings):
-            return headings[index]
-        return ""
-
-    if fallback == "cantico_index":
-        index = field.get("fallback_index", 0)
-        songs = pick_cantico_texts(state.get("strongs", []))
-        if 0 <= index < len(songs):
-            return songs[index]
-        return ""
-
-    if fallback == "scripture_link":
-        for link in pick_semantic_links(state.get("links", [])):
-            text = normalize_text(link["text"])
-            if re.search(r"\d", text) and not text.startswith("Cantico") and text.isupper():
-                return text
-        return ""
-
-    if fallback == "adjacent_page_link":
-        direction = field.get("direction")
-        current_match = re.search(r"/(\d+)$", url)
-        if not current_match:
-            return ""
-
-        current_id = int(current_match.group(1))
-        candidates = []
-        for link in state.get("links", []):
-            href = link.get("href") or ""
-            match = re.search(r"/(\d+)$", href)
-            if not match:
-                continue
-            page_id = int(match.group(1))
-            if page_id == current_id:
-                continue
-            candidates.append((page_id, href))
-
-        if direction == "prev":
-            previous = [item for item in candidates if item[0] < current_id]
-            if previous:
-                return urljoin(url, max(previous, key=lambda item: item[0])[1])
-        if direction == "next":
-            following = [item for item in candidates if item[0] > current_id]
-            if following:
-                return urljoin(url, min(following, key=lambda item: item[0])[1])
-        return ""
-
+    if direction == "prev":
+        previous = [item for item in candidates if item[0] < current_id]
+        if previous:
+            return urljoin(url, max(previous, key=lambda item: item[0])[1])
+    if direction == "next":
+        following = [item for item in candidates if item[0] > current_id]
+        if following:
+            return urljoin(url, min(following, key=lambda item: item[0])[1])
     return ""
 
 
-async def extract_field(page, field: dict, state: dict) -> str:
-    locator = page.locator(f"xpath={field['xpath']}")
-    if await locator.count() > 0:
-        element = locator.first
-        if field["kind"] == "href":
-            href = await element.get_attribute("href")
-            if href:
-                return urljoin(page.url, href.strip())
-        if field["kind"] == "following_text":
-            text = await extract_following_text(element)
-            if text:
-                return text
-        else:
-            try:
-                text = await element.inner_text(timeout=3000)
-            except Exception:  # noqa: BLE001
-                try:
-                    text = await element.text_content(timeout=3000)
-                except Exception:  # noqa: BLE001
-                    text = ""
-            if text:
-                return normalize_text(text)
+async def extract_meeting_page(page) -> dict[str, object]:
+    data = await page.evaluate(
+        """() => {
+            const article = document.querySelector('article#article, article.document, article');
+            if (!article) {
+                return {};
+            }
+            const scope = article.querySelector('.scalableui') || article;
+            const contentRoot = scope.querySelector('.bodyTxt') || scope;
 
-    return fallback_field_value(page.url, field, state)
+            const clean = (value) => (value || '').replace(/\\s+/g, ' ').trim();
+            const cloneAndText = (node) => {
+                if (!node) {
+                    return '';
+                }
+                const clone = node.cloneNode(true);
+                clone.querySelectorAll(
+                    '.dc-screenReaderText, textarea, label, script, style, noscript'
+                ).forEach((item) => item.remove());
+                return clean(clone.innerText || clone.textContent || '');
+            };
+            const topLevelNode = (node) => {
+                let current = node;
+                while (current && current.parentElement && current.parentElement !== contentRoot) {
+                    current = current.parentElement;
+                }
+                return current;
+            };
+            const headingText = (node) => clean(node ? (node.innerText || node.textContent || '') : '');
+            const canticoFromHeading = (node) => {
+                if (!node) {
+                    return '';
+                }
+                const candidates = [...node.querySelectorAll('strong')]
+                    .map((item) => clean(item.innerText || item.textContent || ''));
+                for (const text of candidates) {
+                    if (/^Cantico\\s+\\d+/i.test(text)) {
+                        return text;
+                    }
+                }
+                const fallback = headingText(node);
+                const match = fallback.match(/Cantico\\s+\\d+/i);
+                return match ? clean(match[0]) : '';
+            };
+            const collectRelatedText = (heading) => {
+                const start = topLevelNode(heading);
+                if (!start) {
+                    return '';
+                }
+                const parts = [];
+                for (let current = start.nextElementSibling; current; current = current.nextElementSibling) {
+                    if (current.querySelector('h2, h3') || /^(H2|H3)$/.test(current.tagName)) {
+                        break;
+                    }
+                    const text = cloneAndText(current);
+                    if (text) {
+                        parts.push(text);
+                    }
+                }
+                return clean(parts.join(' '));
+            };
+            const findSectionHeading = (label) =>
+                [...contentRoot.querySelectorAll('h2')].find((node) => headingText(node).includes(label)) || null;
+            const collectSectionItems = (sectionHeading) => {
+                const sectionTop = topLevelNode(sectionHeading);
+                if (!sectionTop) {
+                    return [];
+                }
+                const items = [];
+                for (let current = sectionTop.nextElementSibling; current; current = current.nextElementSibling) {
+                    const heading = /^(H2|H3)$/.test(current.tagName)
+                        ? current
+                        : current.querySelector('h2, h3');
+                    if (!heading) {
+                        continue;
+                    }
+                    if (heading.tagName === 'H2') {
+                        break;
+                    }
+                    const title = headingText(heading);
+                    if (!title) {
+                        continue;
+                    }
+                    items.push({
+                        title,
+                        note: collectRelatedText(heading),
+                        cantico: canticoFromHeading(heading),
+                    });
+                }
+                return items;
+            };
+
+            const section1 = findSectionHeading('TESORI DELLA PAROLA DI DIO');
+            const section2 = findSectionHeading('EFFICACI NEL MINISTERO');
+            const section3 = findSectionHeading('VITA CRISTIANA');
+            const header = scope.querySelector('header') || scope;
+            const weekHeading = header.querySelector('h1');
+            const chaptersHeading = header.querySelector('h2');
+            const allH3 = [...contentRoot.querySelectorAll('h3')];
+            const allSongs = allH3.map((node) => canticoFromHeading(node)).filter(Boolean);
+            const section1Items = collectSectionItems(section1);
+            const section2Items = collectSectionItems(section2);
+            const section3Items = collectSectionItems(section3);
+            const studyIndex = section3Items.findIndex((item) =>
+                item.title.includes('Studio biblico di congregazione')
+            );
+            const commentHeading = allH3.find((node) => headingText(node).includes('Commenti conclusivi')) || null;
+
+            let song2 = '';
+            let livingItems = [];
+            let study = { title: '', note: '' };
+            if (section3Items.length > 0) {
+                const maybeSong = section3Items[0].cantico;
+                const contentItems = maybeSong ? section3Items.slice(1) : section3Items.slice();
+                song2 = maybeSong;
+                const contentStudyIndex = contentItems.findIndex((item) =>
+                    item.title.includes('Studio biblico di congregazione')
+                );
+                if (contentStudyIndex >= 0) {
+                    livingItems = contentItems.slice(0, contentStudyIndex);
+                    study = contentItems[contentStudyIndex];
+                } else {
+                    livingItems = contentItems;
+                }
+            }
+
+            return {
+                week: headingText(weekHeading),
+                bible_chapters: headingText(chaptersHeading),
+                song_1: allSongs[0] || '',
+                section_1: headingText(section1),
+                treasures: section1Items[0]?.title || '',
+                gems: section1Items[1]?.title || '',
+                gems_notes: section1Items[1]?.note || '',
+                reading: section1Items[2]?.title || '',
+                reading_material: section1Items[2]?.note || '',
+                section_2: headingText(section2),
+                ministry_items: section2Items.map((item) => ({ title: item.title, note: item.note })),
+                section_3: headingText(section3),
+                song_2: song2,
+                living_items: livingItems.map((item) => ({ title: item.title, note: item.note })),
+                study: study.title || '',
+                study_material: study.note || '',
+                song_3: canticoFromHeading(commentHeading),
+                raw_section3_items: section3Items.map((item) => ({ title: item.title, note: item.note })),
+                raw_study_index: studyIndex,
+            };
+        }"""
+    )
+    return {key: normalize_text(value) if isinstance(value, str) else value for key, value in data.items()}
+
+
+def fill_group(row: dict[str, str], prefix: str, items: list[dict[str, str]], max_items: int) -> None:
+    for index in range(max_items):
+        title_key = f"{prefix}_{index + 1}"
+        note_key = f"{prefix}_{index + 1}_note"
+        row[title_key] = ""
+        row[note_key] = ""
+        if index < len(items):
+            row[title_key] = normalize_text(items[index].get("title", ""))
+            row[note_key] = normalize_text(items[index].get("note", ""))
 
 
 async def scrape_url(page, url: str) -> dict[str, str]:
-    rule = select_rule(url)
     row = {name: "" for name in CSV_FIELD_ORDER}
     row["source_url"] = url
 
@@ -718,23 +304,39 @@ async def scrape_url(page, url: str) -> dict[str, str]:
         await page.goto(url, wait_until="commit", timeout=NAVIGATION_TIMEOUT_MS)
         try:
             await page.wait_for_function(
-                """() => document.body && document.body.innerText.trim().length > 1000""",
+                """() => {
+                    const article = document.querySelector('article#article, article.document, article');
+                    return article && article.innerText && article.innerText.trim().length > 1000;
+                }""",
                 timeout=FIELD_READY_TIMEOUT_MS,
             )
         except Exception:  # noqa: BLE001
             pass
 
-        state = await collect_page_state(page)
-        for field in rule["fields"]:
-            row[field["name"]] = await extract_field(page, field, state)
-        for group in rule.get("section_groups", []):
-            items = await extract_section_group(page, group)
-            for index in range(group["max_items"]):
-                item_name = f'{group["prefix"]}_{index + 1}'
-                note_name = f'{group["prefix"]}_{index + 1}_note'
-                if index < len(items):
-                    row[item_name] = items[index]["title"]
-                    row[note_name] = items[index]["note"]
+        extracted = await extract_meeting_page(page)
+        page_title = await page.title()
+        links = await collect_page_links(page)
+
+        row["week"] = extracted.get("week", "") or title_prefix(page_title)
+        row["bible_chapters"] = extracted.get("bible_chapters", "")
+        row["song_1"] = extracted.get("song_1", "")
+        row["section_1"] = extracted.get("section_1", "")
+        row["treasures"] = extracted.get("treasures", "")
+        row["gems"] = extracted.get("gems", "")
+        row["gems_notes"] = extracted.get("gems_notes", "")
+        row["reading"] = extracted.get("reading", "")
+        row["reading_material"] = extracted.get("reading_material", "")
+        row["section_2"] = extracted.get("section_2", "")
+        row["section_3"] = extracted.get("section_3", "")
+        row["song_2"] = extracted.get("song_2", "")
+        row["study"] = extracted.get("study", "")
+        row["study_material"] = extracted.get("study_material", "")
+        row["song_3"] = extracted.get("song_3", "")
+        row["prev_week_page"] = adjacent_page_link(url, links, "prev")
+        row["next_week_page"] = adjacent_page_link(url, links, "next")
+
+        fill_group(row, "ministry", extracted.get("ministry_items", []), 5)
+        fill_group(row, "living", extracted.get("living_items", []), 4)
     except Exception as exc:  # noqa: BLE001
         row["error"] = str(exc)
 
@@ -752,6 +354,7 @@ async def crawl(urls: list[str]) -> list[dict[str, str]]:
 
         rows = []
         for url in urls:
+            print(f"Scraping {url} ...", file=sys.stderr, flush=True)
             page = await context.new_page()
             try:
                 rows.append(await scrape_url(page, url))
@@ -778,6 +381,7 @@ async def crawl_deep(start_url: str, depth: int) -> list[dict[str, str]]:
             if current_url in seen:
                 break
             seen.add(current_url)
+            print(f"Scraping {current_url} ...", file=sys.stderr, flush=True)
 
             page = await context.new_page()
             try:
