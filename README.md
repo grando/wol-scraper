@@ -9,7 +9,7 @@ Small Python + Playwright CLI for scraping Watchtower Online Library pages.
 - If `--output` is omitted, the result is written to stdout
 - Progress messages and errors go to stderr, so stdout can be piped into other commands
 - `--deep` is only for a single direct URL, with values from 1 to 50
-- In deep mode, the CLI follows `next_week_page` links and includes each parsed URL with its validity flag
+- In deep mode, the CLI follows `next_week_page` links and skips invalid pages while continuing the crawl
 - `--show-browser` opens Playwright in headed mode when the container has a display available
 - If you run the script with no arguments, it prints a short welcome page with the main options and examples
 

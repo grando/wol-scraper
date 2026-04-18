@@ -593,7 +593,7 @@ def main() -> None:
     if args.deep > 1:
         start_url = collect_direct_url(args)
         rows = asyncio.run(crawl_deep(start_url, args.deep, args.show_browser))
-        rows_to_write = rows
+        rows_to_write = [row for row in rows if is_valid_row(row)]
     else:
         urls = collect_urls(args)
         rows = asyncio.run(crawl(urls, args.show_browser))

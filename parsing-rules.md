@@ -23,7 +23,7 @@ Applied decisions for the current scraper behavior:
 - For variable section groups, keep fixed-width columns up to the documented maximum and leave missing slots empty.
 - For note fields, aggregate all related non-heading blocks for the current part until the next heading boundary.
 - Skip a page when any of `section_1`, `section_2`, or `section_3` is missing or empty, and report the number of skipped URLs.
-- For deep direct-URL crawls, follow `next_week_page` links up to the requested depth, keep each parsed URL in output, and attach a validity flag to each page result.
+- For deep direct-URL crawls, follow `next_week_page` links up to the requested depth and skip invalid pages from the final output while continuing the crawl.
 - Use `commit` navigation on WOL pages and wait for the rendered text to become available before extraction.
 - Use a fresh Playwright page per URL so one failed or redirected page does not leak state into the next one.
 - Keep lightweight CLI progress output during scraping.

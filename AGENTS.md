@@ -80,7 +80,7 @@ This repository is a small Python Playwright CLI for scraping Watchtower Online 
 - If the CLI is invoked with no arguments, it should print a short welcome page with the main options and common examples.
 - Pages missing `section_1`, `section_2`, or `section_3` should be skipped, and the CLI should report how many URLs were skipped.
 - `--deep` is only valid for a single direct URL, accepts values from 1 to 50, and follows `next_week_page` links.
-- Deep mode should keep the parsed URL chain in output and mark each page with a validity flag.
+- Deep mode should skip invalid pages from the final output but continue following `next_week_page` links until the requested depth or chain end.
 - Keep `parsing-rules.md` current with every learned page shape, rule, and regression case.
 - Treat `parsing-rules.md` as the source of truth for parsing behavior and test cases.
 - When a new parsing case is discovered, update `parsing-rules.md` first, then adjust the scraper code.
