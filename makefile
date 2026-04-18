@@ -59,6 +59,11 @@ test-sample:
 host-install:
 	$(PYTHON) -m venv .venv
 	. .venv/bin/activate && pip install --upgrade pip && pip install -r requirements.txt && python -m playwright install chromium
+	@if [ -d "$$HOME/.local/bin" ]; then \
+		ln -sf "$(CURDIR)/wol-scraper.sh" "$$HOME/.local/bin/wol-scraper"; \
+	else \
+		echo "Error: $$HOME/.local/bin does not exist; skipping wol-scraper symlink." >&2; \
+	fi
 
 clean:
 	rm -f output.csv test-output.csv

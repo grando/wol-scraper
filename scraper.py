@@ -7,7 +7,10 @@ import sys
 from pathlib import Path
 from urllib.parse import urljoin
 
-from playwright.async_api import async_playwright
+try:
+    from playwright.async_api import async_playwright
+except ModuleNotFoundError:  # pragma: no cover - only hit when dependencies are missing
+    async_playwright = None
 
 
 USER_AGENT = (
@@ -58,6 +61,24 @@ CSV_FIELD_ORDER = [
     "next_week_page",
     "error",
 ]
+
+WELCOME_TEXT = """WOL Scraper
+
+Small Python + Playwright CLI for Watchtower Online Library pages.
+
+Main options:
+  --urls FILE        Read one URL per line from a text file
+  URLS               Pass one or more direct URLs on the command line
+  --output FILE      Write output to a file; omit it to print to stdout
+  --format csv|json  Choose CSV or JSON output (default: csv)
+  --deep N           Follow next_week_page links from one direct URL (1-50)
+  --show-browser     Open the browser window when a display is available
+
+Common uses:
+  scraper.py --urls sample-urls.txt --output output.csv
+  scraper.py https://wol.jw.org/it/wol/d/r6/lp-i/202026164
+  scraper.py https://wol.jw.org/it/wol/d/r6/lp-i/202026164 --deep 3
+"""
 
 
 def read_urls(path: Path) -> list[str]:
@@ -478,7 +499,18 @@ def write_json_stdout(rows: list[dict[str, str]]) -> None:
     print(json.dumps(rows, ensure_ascii=False, indent=2))
 
 
+def print_welcome() -> None:
+    print(WELCOME_TEXT.strip())
+
+
 def main() -> None:
+    if len(sys.argv) == 1:
+        print_welcome()
+        return
+
+    if async_playwright is None:
+        raise SystemExit("Playwright is not installed. Run 'make host-install' or use Docker.")
+
     args = parse_args()
     if not 1 <= args.deep <= 50:
         raise SystemExit("--deep must be between 1 and 50.")

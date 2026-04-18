@@ -50,6 +50,7 @@ This repository is a small Python Playwright CLI for scraping Watchtower Online 
 - Start container: `make start`
 - Stop container: `make stop`
 - Host install: `make host-install`
+- Shell launcher: `wol-scraper`
 - Run scraper: `make run INPUT=sample-urls.txt OUTPUT=output.csv FORMAT=csv`
 - Run scraper to stdout: `make run INPUT=sample-urls.txt FORMAT=csv`
 - Run a direct URL: `make run URL=https://wol.jw.org/it/wol/d/r6/lp-i/202026161 FORMAT=csv`
@@ -72,7 +73,9 @@ This repository is a small Python Playwright CLI for scraping Watchtower Online 
 - Output defaults to CSV and can also be JSON when the CLI `--format json` option is used.
 - If `--output` is omitted, the result is written to stdout.
 - `--show-browser` is an optional flag that opens Playwright in headed mode when a display is available.
-- `make host-install` prepares the local `.venv` for running the scraper outside Docker.
+- `make host-install` prepares the local `.venv` for running the scraper outside Docker and creates a `~/.local/bin/wol-scraper` symlink when that directory exists.
+- The `wol-scraper` shell launcher is a local convenience script that can be symlinked into `~/.local/bin`.
+- If the CLI is invoked with no arguments, it should print a short welcome page with the main options and common examples.
 - Pages missing `section_1`, `section_2`, or `section_3` should be skipped, and the CLI should report how many URLs were skipped.
 - `--deep` is only valid for a single direct URL, accepts values from 1 to 50, and follows `next_week_page` links.
 - Deep mode should keep the parsed URL chain in output and mark each page with a validity flag.
