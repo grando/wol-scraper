@@ -313,9 +313,6 @@ async def extract_meeting_page(page) -> dict[str, object]:
             const section1Items = collectSectionItems(section1);
             const section2Items = collectSectionItems(section2);
             const section3Items = collectSectionItems(section3);
-            const studyIndex = section3Items.findIndex((item) =>
-                item.title.includes('Studio biblico di congregazione')
-            );
             const commentHeading = allH3.find((node) => headingText(node).includes('Commenti conclusivi')) || null;
 
             let song2 = '';
@@ -355,8 +352,6 @@ async def extract_meeting_page(page) -> dict[str, object]:
                 study: study.title || '',
                 study_material: study.note || '',
                 song_3: canticoFromHeading(commentHeading),
-                raw_section3_items: section3Items.map((item) => ({ title: item.title, note: item.note })),
-                raw_study_index: studyIndex,
             };
         }"""
     )
@@ -603,8 +598,6 @@ def transform_study_note(text: str) -> str:
     match = re.match(r"^\((\d+)\s*min\)\s*", cleaned)
     if not match:
         return cleaned
-    if match.group(1) == "30":
-        return cleaned
     return normalize_text(cleaned[match.end():])
 
 
@@ -659,13 +652,16 @@ def main() -> None:
     if args.deep > 1:
         start_url = collect_direct_url(args)
         rows = asyncio.run(crawl_deep(start_url, args.deep, args.show_browser))
-        rows_to_write = [row for row in rows if is_valid_row(row)]
     else:
         urls = collect_urls(args)
         rows = asyncio.run(crawl(urls, args.show_browser))
-        rows_to_write = [row for row in rows if is_valid_row(row)]
-
-    skipped = sum(1 for row in rows if not is_valid_row(row))
+    rows_to_write = []
+    skipped = 0
+    for row in rows:
+        if is_valid_row(row):
+            rows_to_write.append(row)
+        else:
+            skipped += 1
     if args.output:
         output_path = Path(args.output)
         output_path.parent.mkdir(parents=True, exist_ok=True)

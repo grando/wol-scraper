@@ -42,7 +42,7 @@ make stop
 - In `gdoc-tesori`, the `treasures` cell appends only the timing label from `treasures_note`, for example `1. La bellezza del nostro paradiso spirituale (10 min)`.
 - In `gdoc-tesori`, `song_1`, `song_2`, and `song_3` keep only the song number.
 - In `gdoc-tesori`, each `living_*_note` keeps only the first sentence, up to the first period.
-- In `gdoc-tesori`, `study_material` removes the leading timing label when it is not `(30 min)`.
+- In `gdoc-tesori`, `study_material` keeps the text after removing any leading timing label, for example `(30 min) lfb capp. 82-83` becomes `lfb capp. 82-83`.
 - Omit `OUTPUT` to stream the result to stdout.
 - Use shell pipes freely; logs and errors are written to stderr.
 - Use `URL=...` with `make run` when you want to scrape a direct URL without a file.

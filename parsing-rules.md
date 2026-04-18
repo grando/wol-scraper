@@ -23,6 +23,8 @@ Applied decisions for the current scraper behavior:
 - Add `treasures_note` as the related-content block immediately after the first section-1 part heading.
 - For variable section groups, keep fixed-width columns up to the documented maximum and leave missing slots empty.
 - For note fields, aggregate all related non-heading blocks for the current part until the next heading boundary.
+- Remove unused debug-only extraction values from the semantic Playwright return object once the field split is stable.
+- Build the final valid/skipped row sets in one pass so CLI filtering stays simple without re-checking each row twice.
 - Skip a page when any of `section_1`, `section_2`, or `section_3` is missing or empty, and report the number of skipped URLs.
 - For deep direct-URL crawls, follow `next_week_page` links up to the requested depth and skip invalid pages from the final output while continuing the crawl.
 - Use `commit` navigation on WOL pages and wait for the rendered text to become available before extraction.
@@ -130,6 +132,7 @@ Field rules:
 - `study_material`: related content after the study heading until the next heading
 - `song_3`: `Cantico` found inside the `Commenti conclusivi` heading
 - `prev_week_page` and `next_week_page`: adjacent week links inferred from the page navigation links
+- `gdoc-tesori` `study_material`: keep the text after stripping any leading timing label
 
 ### Case 2: section-count variants
 
