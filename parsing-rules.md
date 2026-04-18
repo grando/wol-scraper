@@ -49,6 +49,7 @@ Observed shape:
 - The main content is a meeting/program page with an `h1` heading.
 - The page contains multiple section headings and link-heavy blocks.
 - The page includes useful text in the visible body, even when specific container selectors are inconsistent.
+- The later-life study block sits at `p45` on this variant, not at the same anchor used by the later-week page.
 
 What matters for extraction:
 - Use the page URL as the primary identifier.
@@ -87,11 +88,18 @@ Use these xpaths for the current example page only. They may change for the next
 - `week` -> `//*[@id="p1"]`
 - `bible_chapters` -> `//*[@id="p2"]`
 - `song_1` -> `//*[@id="p3"]/a/strong`
+- `treasures` -> `//*[@id="p5"]/strong`
+- `gems` -> `//*[@id="p11"]/strong`
+- `gems_notes` -> `//*[@id="p11"]` with `following_text`
+- `reading` -> `//*[@id="p17"]`
+- `reading_material` -> `//*[@id="p17"]` with `following_text`
 - `section_1` -> `//*[@id="p4"]/strong`
 - `section_2` -> `//*[@id="p19"]/strong`
 - `section_3` -> `//*[@id="p26"]/strong`
 - `song_2` -> `//*[@id="p27"]/a/strong`
 - `song_3` -> `//*[@id="p47"]/span[2]/a/strong`
+- `study` -> `//*[@id="p45"]/strong`
+- `study_material` -> `//*[@id="p45"]` with `following_text`
 - `prev_week_page` -> `//*[@id="publicationNavigation"]/div[3]/ul/li[1]/a`
 - `next_week_page` -> `//*[@id="publicationNavigation"]/div[3]/ul/li[2]/a`
 
@@ -110,6 +118,8 @@ Example page:
 Observed shape:
 - The page keeps the same overall structure as Case 1.
 - `week`, `bible_chapters`, and section headings still match the same semantic positions.
+- The page also exposes the `treasures`, `gems`, `reading`, and `study` blocks as direct heading anchors.
+- The note/material fields are the text that follows those headings until the next section heading.
 - The song fields are exposed as `strong` text in body order rather than always appearing at the old song xpaths.
 - The navigation links are still present, but the ids for the old song xpaths can be absent.
 
@@ -118,11 +128,19 @@ What matters for extraction:
 - Reuse the same section-heading xpaths where they still match.
 - Use ordered `Cantico` strong text as the generic fallback for songs when the exact xpath is missing.
 - Keep previous/next page links as absolute URLs.
+- Use the heading xpath as the anchor for `following_text` fields and stop before the next heading-like block.
 
 Case 2 field map:
 - `week` -> `//*[@id="p1"]`
 - `bible_chapters` -> `//*[@id="p2"]`
 - `song_1` -> `//*[@id="p3"]/a/strong`
+- `treasures` -> `//*[@id="p5"]/strong`
+- `gems` -> `//*[@id="p11"]/strong`
+- `gems_notes` -> `//*[@id="p11"]` with `following_text`
+- `reading` -> `//*[@id="p17"]`
+- `reading_material` -> `//*[@id="p17"]` with `following_text`
+- `study` -> `//*[@id="p37"]/strong`
+- `study_material` -> `//*[@id="p37"]` with `following_text`
 - `section_1` -> `//*[@id="p4"]/strong`
 - `section_2` -> `//*[@id="p19"]/strong`
 - `section_3` -> `//*[@id="p26"]/strong`
@@ -134,6 +152,7 @@ Case 2 field map:
 Regression checks:
 - Case 2 must still populate all requested fields.
 - Case 2 must still resolve the second and third song values even when the old song xpaths are absent.
+- Case 2 must keep the note/material extraction bounded to the current section and not include the next heading block.
 - Case 2 must keep the same CSV columns as Case 1.
 
 ## New Cases

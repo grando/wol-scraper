@@ -18,7 +18,227 @@ FIELD_READY_TIMEOUT_MS = 60000
 
 PAGE_RULES = [
     {
-        "name": "meeting_page_v1",
+        "name": "meeting_page_202026161",
+        "url_pattern": re.compile(r"^https://wol\.jw\.org/it/wol/d/r6/lp-i/202026161$"),
+        "ready_xpath": '//*[@id="p1"]',
+        "fields": [
+            {
+                "name": "week",
+                "xpath": '//*[@id="p1"]',
+                "kind": "text",
+                "fallback": "title_prefix",
+            },
+            {
+                "name": "bible_chapters",
+                "xpath": '//*[@id="p2"]',
+                "kind": "text",
+                "fallback": "scripture_link",
+            },
+            {
+                "name": "song_1",
+                "xpath": '//*[@id="p3"]/a/strong',
+                "kind": "text",
+                "fallback": "cantico_index",
+                "fallback_index": 0,
+            },
+            {
+                "name": "treasures",
+                "xpath": '//*[@id="p5"]/strong',
+                "kind": "text",
+            },
+            {
+                "name": "gems",
+                "xpath": '//*[@id="p11"]/strong',
+                "kind": "text",
+            },
+            {
+                "name": "gems_notes",
+                "xpath": '//*[@id="p11"]',
+                "kind": "following_text",
+            },
+            {
+                "name": "reading",
+                "xpath": '//*[@id="p17"]',
+                "kind": "text",
+            },
+            {
+                "name": "reading_material",
+                "xpath": '//*[@id="p17"]',
+                "kind": "following_text",
+            },
+            {
+                "name": "section_1",
+                "xpath": '//*[@id="p4"]/strong',
+                "kind": "text",
+                "fallback": "heading_index",
+                "fallback_index": 0,
+            },
+            {
+                "name": "section_2",
+                "xpath": '//*[@id="p19"]/strong',
+                "kind": "text",
+                "fallback": "heading_index",
+                "fallback_index": 1,
+            },
+            {
+                "name": "section_3",
+                "xpath": '//*[@id="p26"]/strong',
+                "kind": "text",
+                "fallback": "heading_index",
+                "fallback_index": 2,
+            },
+            {
+                "name": "song_2",
+                "xpath": '//*[@id="p27"]/a/strong',
+                "kind": "text",
+                "fallback": "cantico_index",
+                "fallback_index": 1,
+            },
+            {
+                "name": "song_3",
+                "xpath": '//*[@id="p47"]/span[2]/a/strong',
+                "kind": "text",
+                "fallback": "cantico_index",
+                "fallback_index": 2,
+            },
+            {
+                "name": "study",
+                "xpath": '//*[@id="p45"]/strong',
+                "kind": "text",
+            },
+            {
+                "name": "study_material",
+                "xpath": '//*[@id="p45"]',
+                "kind": "following_text",
+            },
+            {
+                "name": "prev_week_page",
+                "xpath": '//*[@id="publicationNavigation"]/div[3]/ul/li[1]/a',
+                "kind": "href",
+                "fallback": "adjacent_page_link",
+                "direction": "prev",
+            },
+            {
+                "name": "next_week_page",
+                "xpath": '//*[@id="publicationNavigation"]/div[3]/ul/li[2]/a',
+                "kind": "href",
+                "fallback": "adjacent_page_link",
+                "direction": "next",
+            },
+        ],
+    },
+    {
+        "name": "meeting_page_202026164",
+        "url_pattern": re.compile(r"^https://wol\.jw\.org/it/wol/d/r6/lp-i/202026164$"),
+        "ready_xpath": '//*[@id="p1"]',
+        "fields": [
+            {
+                "name": "week",
+                "xpath": '//*[@id="p1"]',
+                "kind": "text",
+                "fallback": "title_prefix",
+            },
+            {
+                "name": "bible_chapters",
+                "xpath": '//*[@id="p2"]',
+                "kind": "text",
+                "fallback": "scripture_link",
+            },
+            {
+                "name": "song_1",
+                "xpath": '//*[@id="p3"]/a/strong',
+                "kind": "text",
+                "fallback": "cantico_index",
+                "fallback_index": 0,
+            },
+            {
+                "name": "treasures",
+                "xpath": '//*[@id="p5"]/strong',
+                "kind": "text",
+            },
+            {
+                "name": "gems",
+                "xpath": '//*[@id="p11"]/strong',
+                "kind": "text",
+            },
+            {
+                "name": "gems_notes",
+                "xpath": '//*[@id="p11"]',
+                "kind": "following_text",
+            },
+            {
+                "name": "reading",
+                "xpath": '//*[@id="p17"]',
+                "kind": "text",
+            },
+            {
+                "name": "reading_material",
+                "xpath": '//*[@id="p17"]',
+                "kind": "following_text",
+            },
+            {
+                "name": "section_1",
+                "xpath": '//*[@id="p4"]/strong',
+                "kind": "text",
+                "fallback": "heading_index",
+                "fallback_index": 0,
+            },
+            {
+                "name": "section_2",
+                "xpath": '//*[@id="p19"]/strong',
+                "kind": "text",
+                "fallback": "heading_index",
+                "fallback_index": 1,
+            },
+            {
+                "name": "section_3",
+                "xpath": '//*[@id="p26"]/strong',
+                "kind": "text",
+                "fallback": "heading_index",
+                "fallback_index": 2,
+            },
+            {
+                "name": "study",
+                "xpath": '//*[@id="p37"]/strong',
+                "kind": "text",
+            },
+            {
+                "name": "study_material",
+                "xpath": '//*[@id="p37"]',
+                "kind": "following_text",
+            },
+            {
+                "name": "song_2",
+                "xpath": '//*[@id="p27"]/a/strong',
+                "kind": "text",
+                "fallback": "cantico_index",
+                "fallback_index": 1,
+            },
+            {
+                "name": "song_3",
+                "xpath": '//*[@id="p47"]/span[2]/a/strong',
+                "kind": "text",
+                "fallback": "cantico_index",
+                "fallback_index": 2,
+            },
+            {
+                "name": "prev_week_page",
+                "xpath": '//*[@id="publicationNavigation"]/div[3]/ul/li[1]/a',
+                "kind": "href",
+                "fallback": "adjacent_page_link",
+                "direction": "prev",
+            },
+            {
+                "name": "next_week_page",
+                "xpath": '//*[@id="publicationNavigation"]/div[3]/ul/li[2]/a',
+                "kind": "href",
+                "fallback": "adjacent_page_link",
+                "direction": "next",
+            },
+        ],
+    },
+    {
+        "name": "meeting_page_generic",
         "url_pattern": re.compile(r"^https://wol\.jw\.org/it/wol/d/r6/lp-i/\d+$"),
         "ready_xpath": '//*[@id="p1"]',
         "fields": [
@@ -225,6 +445,43 @@ def pick_cantico_texts(strongs: list[dict]) -> list[str]:
     return matches
 
 
+async def extract_following_text(locator) -> str:
+    element = await locator.element_handle()
+    if not element:
+        return ""
+
+    text = await element.evaluate(
+        """(node) => {
+            const looksLikeTitle = (value) => {
+                const text = value.trim();
+                return text
+                    && text.length <= 80
+                    && !text.startsWith('(')
+                    && text === text.toUpperCase();
+            };
+            const parts = [];
+            let current = node.nextElementSibling;
+            while (current) {
+                if (/^H[1-6]$/.test(current.tagName)) {
+                    break;
+                }
+                const clone = current.cloneNode(true);
+                clone.querySelectorAll('.dc-screenReaderText').forEach((item) => item.remove());
+                const value = (clone.innerText || clone.textContent || '').replace(/\\s+/g, ' ').trim();
+                if (value && looksLikeTitle(value)) {
+                    break;
+                }
+                if (value) {
+                    parts.push(value);
+                }
+                current = current.nextElementSibling;
+            }
+            return parts.join(' ').replace(/\\s+/g, ' ').trim();
+        }"""
+    )
+    return normalize_text(text or "")
+
+
 def fallback_field_value(url: str, field: dict, state: dict) -> str:
     fallback = field.get("fallback")
     if fallback == "title_prefix":
@@ -294,6 +551,10 @@ async def extract_field(page, field: dict, state: dict) -> str:
             href = await element.get_attribute("href")
             if href:
                 return urljoin(page.url, href.strip())
+        if field["kind"] == "following_text":
+            text = await extract_following_text(element)
+            if text:
+                return text
         else:
             try:
                 text = await element.inner_text(timeout=3000)
@@ -350,11 +611,23 @@ async def crawl(urls: list[str], output_path: Path) -> None:
         await browser.close()
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    fieldnames = ["source_url", *[field["name"] for field in PAGE_RULES[0]["fields"]], "error"]
+    fieldnames = ["source_url", *ordered_fieldnames(), "error"]
     with output_path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
+
+
+def ordered_fieldnames() -> list[str]:
+    names = []
+    seen = set()
+    for rule in PAGE_RULES:
+        for field in rule["fields"]:
+            name = field["name"]
+            if name not in seen:
+                names.append(name)
+                seen.add(name)
+    return names
 
 
 def parse_args() -> argparse.Namespace:
