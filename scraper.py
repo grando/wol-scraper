@@ -765,7 +765,12 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Scrape a list of URLs and write the extracted data to CSV or JSON."
     )
-    parser.add_argument("--urls", required=True, help="Text file with one URL per line.")
+    parser.add_argument(
+        "--urls",
+        dest="urls_file",
+        help="Text file with one URL per line. Optional when URLs are passed directly.",
+    )
+    parser.add_argument("urls", nargs="*", help="One or more URLs to scrape directly.")
     parser.add_argument(
         "--output",
         help="Output file to write. If omitted, the result is written to stdout.",
@@ -777,6 +782,20 @@ def parse_args() -> argparse.Namespace:
         help="Output format to write (default: csv).",
     )
     return parser.parse_args()
+
+
+def collect_urls(args: argparse.Namespace) -> list[str]:
+    urls = []
+    if args.urls_file:
+        urls.extend(read_urls(Path(args.urls_file)))
+    urls.extend(args.urls)
+    if not urls:
+        raise SystemExit("Provide --urls FILE or one or more direct URLs.")
+    return urls
+
+
+def is_valid_row(row: dict[str, str]) -> bool:
+    return all(row.get(field, "").strip() for field in ("section_1", "section_2", "section_3"))
 
 
 def write_csv(rows: list[dict[str, str]], output_path: Path) -> None:
@@ -802,20 +821,28 @@ def write_json_stdout(rows: list[dict[str, str]]) -> None:
 
 def main() -> None:
     args = parse_args()
-    urls = read_urls(Path(args.urls))
+    urls = collect_urls(args)
     rows = asyncio.run(crawl(urls))
+    valid_rows = []
+    skipped = 0
+    for row in rows:
+        if is_valid_row(row):
+            valid_rows.append(row)
+        else:
+            skipped += 1
     if args.output:
         output_path = Path(args.output)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         if args.format == "csv":
-            write_csv(rows, output_path)
+            write_csv(valid_rows, output_path)
         else:
-            write_json(rows, output_path)
+            write_json(valid_rows, output_path)
     else:
         if args.format == "csv":
-            write_csv_stdout(rows)
+            write_csv_stdout(valid_rows)
         else:
-            write_json_stdout(rows)
+            write_json_stdout(valid_rows)
+    print(f"Skipped {skipped} invalid URL(s).", file=sys.stderr)
 
 
 if __name__ == "__main__":

@@ -51,6 +51,7 @@ This repository is a small Python Playwright CLI for scraping Watchtower Online 
 - Stop container: `make stop`
 - Run scraper: `make run INPUT=sample-urls.txt OUTPUT=output.csv FORMAT=csv`
 - Run scraper to stdout: `make run INPUT=sample-urls.txt FORMAT=csv`
+- Run a direct URL: `make run URL=https://wol.jw.org/it/wol/d/r6/lp-i/202026161 FORMAT=csv`
 - Test scraper: `make test`
 - Open shell: `make shell`
 - Clean outputs: `make clean`
@@ -65,8 +66,10 @@ This repository is a small Python Playwright CLI for scraping Watchtower Online 
 - If a user-supplied xpath sketch does not match the live DOM, verify the corrected anchor on the page and record the corrected xpath in `parsing-rules.md` before changing the scraper.
 - For page extraction, prefer Playwright-native APIs first. Only add separate HTML parsing logic, or a combination approach, when a documented page case requires it.
 - Input files are plain text with one URL per line.
+- The CLI can also accept one or more direct URLs when `--urls` is omitted.
 - Output defaults to CSV and can also be JSON when the CLI `--format json` option is used.
 - If `--output` is omitted, the result is written to stdout.
+- Pages missing `section_1`, `section_2`, or `section_3` should be skipped, and the CLI should report how many URLs were skipped.
 - Keep `parsing-rules.md` current with every learned page shape, rule, and regression case.
 - Treat `parsing-rules.md` as the source of truth for parsing behavior and test cases.
 - When a new parsing case is discovered, update `parsing-rules.md` first, then adjust the scraper code.

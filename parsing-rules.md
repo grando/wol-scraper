@@ -21,6 +21,7 @@ Applied decisions for the current scraper behavior:
 - For link fields, try xpath extraction first and then derive the page URL from the current week id when the link is not exposed in the live tree.
 - For variable section groups, keep fixed-width columns up to the documented maximum and leave missing slots empty.
 - For note fields, use the first non-heading block immediately after the item heading.
+- Skip a page when any of `section_1`, `section_2`, or `section_3` is missing or empty, and report the number of skipped URLs.
 - Use `commit` navigation on WOL pages and wait for the rendered text to become available before extraction.
 - Use a fresh Playwright page per URL so one failed or redirected page does not leak state into the next one.
 - Keep lightweight CLI progress output during scraping.
