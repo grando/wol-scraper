@@ -25,6 +25,9 @@ This repository is a small Python Playwright CLI for scraping Watchtower Online 
 
 - Use Python as the language.
 - Use Playwright for crawling.
+- Prefer Playwright as the browser automation tool.
+- Do not use Chrome DevTools by default in this project.
+- If Chrome DevTools seems useful, ask the user before using it.
 - Keep all installations and runtime requirements inside Docker.
 - Do not require host-side Python package installation.
 - Prefer Docker and `make` for all project actions.
