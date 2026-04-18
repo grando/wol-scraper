@@ -78,6 +78,8 @@ Common uses:
   scraper.py --urls sample-urls.txt --output output.csv
   scraper.py https://wol.jw.org/it/wol/d/r6/lp-i/202026164
   scraper.py https://wol.jw.org/it/wol/d/r6/lp-i/202026164 --deep 3
+
+Progress and errors are written to stderr so stdout stays usable for pipes.
 """
 
 
@@ -98,6 +100,10 @@ def title_prefix(title: str) -> str:
         if separator in title:
             return normalize_text(title.split(separator, 1)[0])
     return normalize_text(title)
+
+
+def log(message: str) -> None:
+    print(message, file=sys.stderr, flush=True)
 
 
 async def collect_page_links(page) -> list[dict[str, str]]:
@@ -379,7 +385,7 @@ async def crawl(urls: list[str], show_browser: bool) -> list[dict[str, str]]:
 
         rows = []
         for url in urls:
-            print(f"Scraping {url} ...", file=sys.stderr, flush=True)
+            log(f"Scraping {url} ...")
             page = await context.new_page()
             try:
                 rows.append(await scrape_url(page, url))
@@ -403,7 +409,7 @@ async def crawl_deep(start_url: str, depth: int, show_browser: bool) -> list[dic
             if current_url in seen:
                 break
             seen.add(current_url)
-            print(f"Scraping {current_url} ...", file=sys.stderr, flush=True)
+            log(f"Scraping {current_url} ...")
 
             page = await context.new_page()
             try:
@@ -508,10 +514,11 @@ def main() -> None:
         print_welcome()
         return
 
+    args = parse_args()
+
     if async_playwright is None:
         raise SystemExit("Playwright is not installed. Run 'make host-install' or use Docker.")
 
-    args = parse_args()
     if not 1 <= args.deep <= 50:
         raise SystemExit("--deep must be between 1 and 50.")
 
@@ -537,7 +544,7 @@ def main() -> None:
             write_csv_stdout(rows_to_write)
         else:
             write_json_stdout(rows_to_write)
-    print(f"Skipped {skipped} invalid URL(s).", file=sys.stderr)
+    log(f"Skipped {skipped} invalid URL(s).")
 
 
 if __name__ == "__main__":

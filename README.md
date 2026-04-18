@@ -7,6 +7,7 @@ Small Python + Playwright CLI for scraping Watchtower Online Library pages.
 - Input: a text file with one URL per line, or one or more direct URLs on the command line
 - Output: a CSV file or a JSON list of page results
 - If `--output` is omitted, the result is written to stdout
+- Progress messages and errors go to stderr, so stdout can be piped into other commands
 - `--deep` is only for a single direct URL, with values from 1 to 50
 - In deep mode, the CLI follows `next_week_page` links and includes each parsed URL with its validity flag
 - `--show-browser` opens Playwright in headed mode when the container has a display available
@@ -36,6 +37,7 @@ make stop
 - Update `scraper.py` when the final fields are defined.
 - Use `FORMAT=json` with `make run` when you want JSON output from the CLI.
 - Omit `OUTPUT` to stream the result to stdout.
+- Use shell pipes freely; logs and errors are written to stderr.
 - Use `URL=...` with `make run` when you want to scrape a direct URL without a file.
 - Use `DEEP=...` only with `URL=...`.
 - Use `SHOW_BROWSER=1` only when the container can open a display.

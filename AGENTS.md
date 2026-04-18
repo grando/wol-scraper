@@ -72,6 +72,7 @@ This repository is a small Python Playwright CLI for scraping Watchtower Online 
 - The CLI can also accept one or more direct URLs when `--urls` is omitted.
 - Output defaults to CSV and can also be JSON when the CLI `--format json` option is used.
 - If `--output` is omitted, the result is written to stdout.
+- Progress messages and errors should go to stderr so stdout can stay pipe-friendly.
 - `--show-browser` is an optional flag that opens Playwright in headed mode when a display is available.
 - `make host-install` prepares the local `.venv` for running the scraper outside Docker and creates a `~/.local/bin/wol-scraper` symlink when that directory exists.
 - The `wol-scraper` shell launcher is a local convenience script that can be symlinked into `~/.local/bin`.
