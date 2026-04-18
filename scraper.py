@@ -62,6 +62,44 @@ CSV_FIELD_ORDER = [
     "error",
 ]
 
+GDOC_TESORI_HEADER = [
+    "programma",
+    "",
+    "settimana",
+    "ORE",
+    "cantico",
+    "preghiera",
+    "ORE",
+    "presidente",
+    "CAPITOLI BIBBIA",
+    "ORE",
+    "tema",
+    "discorso",
+    "ORE",
+    " materiale",
+    "scaviamo",
+    "",
+    "ORE",
+    "Cantico",
+    "ORE parte 1",
+    "TEMA",
+    "FRATELLO",
+    "ORE parte 2",
+    "TEMA",
+    "FRATELLO",
+    "ORE studio",
+    "MATERIALE",
+    "CONDUTTORE",
+    "LETTORE",
+    "ORE cantico",
+    "CANTICO",
+    "PREGHIERA",
+    "NOTE Stampate",
+    "NOTE per assegnazione",
+]
+
+GDOC_TESORI_ROW_COLUMNS = 33
+
 WELCOME_TEXT = """WOL Scraper
 
 Small Python + Playwright CLI for Watchtower Online Library pages.
@@ -70,7 +108,7 @@ Main options:
   --urls FILE        Read one URL per line from a text file
   URLS               Pass one or more direct URLs on the command line
   --output FILE      Write output to a file; omit it to print to stdout
-  --format csv|json  Choose CSV or JSON output (default: csv)
+  --format csv|json|gdoc-tesori  Choose the output format (default: csv)
   --deep N           Follow next_week_page links from one direct URL (1-50)
   --show-browser     Open the browser window when a display is available
 
@@ -444,7 +482,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--format",
-        choices=("csv", "json"),
+        choices=("csv", "json", "gdoc-tesori"),
         default="csv",
         help="Output format to write (default: csv).",
     )
@@ -505,6 +543,36 @@ def write_json_stdout(rows: list[dict[str, str]]) -> None:
     print(json.dumps(rows, ensure_ascii=False, indent=2))
 
 
+def combine_gdoc_cell(*values: str) -> str:
+    parts = [normalize_text(value) for value in values if normalize_text(value)]
+    return " ".join(parts)
+
+
+def build_gdoc_tesori_row(row: dict[str, str]) -> list[str]:
+    values = [""] * GDOC_TESORI_ROW_COLUMNS
+    values[4] = normalize_text(row.get("song_1", ""))
+    values[8] = normalize_text(row.get("bible_chapters", ""))
+    values[10] = normalize_text(row.get("treasures", ""))
+    values[13] = normalize_text(row.get("gems", ""))
+    values[17] = normalize_text(row.get("song_2", ""))
+    values[19] = combine_gdoc_cell(row.get("living_1", ""), row.get("living_1_note", ""))
+    values[22] = combine_gdoc_cell(row.get("living_2", ""), row.get("living_2_note", ""))
+    values[25] = normalize_text(row.get("study_material", ""))
+    values[29] = normalize_text(row.get("song_3", ""))
+    return values
+
+
+def write_gdoc_tesori(rows: list[dict[str, str]], output_handle) -> None:
+    writer = csv.writer(output_handle)
+    writer.writerow(GDOC_TESORI_HEADER)
+    for row in rows:
+        writer.writerow(build_gdoc_tesori_row(row))
+
+
+def write_gdoc_tesori_stdout(rows: list[dict[str, str]]) -> None:
+    write_gdoc_tesori(rows, sys.stdout)
+
+
 def print_welcome() -> None:
     print(WELCOME_TEXT.strip())
 
@@ -537,11 +605,16 @@ def main() -> None:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         if args.format == "csv":
             write_csv(rows_to_write, output_path)
+        elif args.format == "gdoc-tesori":
+            with output_path.open("w", newline="", encoding="utf-8") as handle:
+                write_gdoc_tesori(rows_to_write, handle)
         else:
             write_json(rows_to_write, output_path)
     else:
         if args.format == "csv":
             write_csv_stdout(rows_to_write)
+        elif args.format == "gdoc-tesori":
+            write_gdoc_tesori_stdout(rows_to_write)
         else:
             write_json_stdout(rows_to_write)
     log(f"Skipped {skipped} invalid URL(s).")

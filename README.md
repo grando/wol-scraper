@@ -5,7 +5,7 @@ Small Python + Playwright CLI for scraping Watchtower Online Library pages.
 ## Input And Output
 
 - Input: a text file with one URL per line, or one or more direct URLs on the command line
-- Output: a CSV file or a JSON list of page results
+- Output: a CSV file, a JSON list of page results, or the `gdoc-tesori` CSV layout
 - If `--output` is omitted, the result is written to stdout
 - Progress messages and errors go to stderr, so stdout can be piped into other commands
 - `--deep` is only for a single direct URL, with values from 1 to 50
@@ -22,6 +22,7 @@ make host-install
 make test
 make run INPUT=sample-urls.txt OUTPUT=output.csv FORMAT=csv
 make run INPUT=sample-urls.txt FORMAT=json
+make run INPUT=sample-urls.txt FORMAT=gdoc-tesori
 make run URL=https://wol.jw.org/it/wol/d/r6/lp-i/202026161 FORMAT=csv
 make run URL=https://wol.jw.org/it/wol/d/r6/lp-i/202026161 DEEP=3 FORMAT=json
 make run URL=https://wol.jw.org/it/wol/d/r6/lp-i/202026161 SHOW_BROWSER=1
@@ -36,6 +37,7 @@ make stop
 - Extraction prefers Playwright-native rendered-page APIs first.
 - Update `scraper.py` when the final fields are defined.
 - Use `FORMAT=json` with `make run` when you want JSON output from the CLI.
+- Use `FORMAT=gdoc-tesori` when you want the Google Docs-friendly CSV layout.
 - Omit `OUTPUT` to stream the result to stdout.
 - Use shell pipes freely; logs and errors are written to stderr.
 - Use `URL=...` with `make run` when you want to scrape a direct URL without a file.

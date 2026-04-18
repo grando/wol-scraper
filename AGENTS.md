@@ -71,6 +71,7 @@ This repository is a small Python Playwright CLI for scraping Watchtower Online 
 - Input files are plain text with one URL per line.
 - The CLI can also accept one or more direct URLs when `--urls` is omitted.
 - Output defaults to CSV and can also be JSON when the CLI `--format json` option is used.
+- Output can also use the `gdoc-tesori` CSV layout when the CLI `--format gdoc-tesori` option is used.
 - If `--output` is omitted, the result is written to stdout.
 - Progress messages and errors should go to stderr so stdout can stay pipe-friendly.
 - `--show-browser` is an optional flag that opens Playwright in headed mode when a display is available.
