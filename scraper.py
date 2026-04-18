@@ -1,7 +1,9 @@
 import argparse
 import asyncio
 import csv
+import json
 import re
+import sys
 from pathlib import Path
 from urllib.parse import urljoin
 
@@ -364,6 +366,7 @@ CSV_FIELD_ORDER = [
     "ministry_5",
     "ministry_5_note",
     "section_3",
+    "song_2",
     "living_1",
     "living_1_note",
     "living_2",
@@ -372,10 +375,9 @@ CSV_FIELD_ORDER = [
     "living_3_note",
     "living_4",
     "living_4_note",
-    "song_2",
-    "song_3",
     "study",
     "study_material",
+    "song_3",
     "prev_week_page",
     "next_week_page",
     "error",
@@ -738,7 +740,7 @@ async def scrape_url(page, url: str) -> dict[str, str]:
     return row
 
 
-async def crawl(urls: list[str], output_path: Path) -> None:
+async def crawl(urls: list[str]) -> list[dict[str, str]]:
     async with async_playwright() as playwright:
         browser = await playwright.chromium.launch(
             headless=True,
@@ -756,26 +758,64 @@ async def crawl(urls: list[str], output_path: Path) -> None:
 
         await browser.close()
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    return rows
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Scrape a list of URLs and write the extracted data to CSV or JSON."
+    )
+    parser.add_argument("--urls", required=True, help="Text file with one URL per line.")
+    parser.add_argument(
+        "--output",
+        help="Output file to write. If omitted, the result is written to stdout.",
+    )
+    parser.add_argument(
+        "--format",
+        choices=("csv", "json"),
+        default="csv",
+        help="Output format to write (default: csv).",
+    )
+    return parser.parse_args()
+
+
+def write_csv(rows: list[dict[str, str]], output_path: Path) -> None:
     with output_path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=CSV_FIELD_ORDER)
         writer.writeheader()
         writer.writerows(rows)
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Scrape a list of URLs and write the extracted data to a CSV file."
-    )
-    parser.add_argument("--urls", required=True, help="Text file with one URL per line.")
-    parser.add_argument("--output", required=True, help="CSV file to write.")
-    return parser.parse_args()
+def write_csv_stdout(rows: list[dict[str, str]]) -> None:
+    writer = csv.DictWriter(sys.stdout, fieldnames=CSV_FIELD_ORDER)
+    writer.writeheader()
+    writer.writerows(rows)
+
+
+def write_json(rows: list[dict[str, str]], output_path: Path) -> None:
+    output_path.write_text(json.dumps(rows, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def write_json_stdout(rows: list[dict[str, str]]) -> None:
+    print(json.dumps(rows, ensure_ascii=False, indent=2))
 
 
 def main() -> None:
     args = parse_args()
     urls = read_urls(Path(args.urls))
-    asyncio.run(crawl(urls, Path(args.output)))
+    rows = asyncio.run(crawl(urls))
+    if args.output:
+        output_path = Path(args.output)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        if args.format == "csv":
+            write_csv(rows, output_path)
+        else:
+            write_json(rows, output_path)
+    else:
+        if args.format == "csv":
+            write_csv_stdout(rows)
+        else:
+            write_json_stdout(rows)
 
 
 if __name__ == "__main__":
