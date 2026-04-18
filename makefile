@@ -3,6 +3,7 @@ INPUT ?= sample-urls.txt
 URL ?=
 OUTPUT ?= output.csv
 FORMAT ?= csv
+DEEP ?= 1
 
 .DEFAULT_GOAL := help
 
@@ -14,7 +15,7 @@ help:
 	@echo "  make start       Start the container"
 	@echo "  make stop        Stop the container"
 	@echo "  make shell       Open a shell in the container"
-	@echo "  make run         Run the scraper with INPUT=$(INPUT) or URL=$(URL), OUTPUT=$(OUTPUT), FORMAT=$(FORMAT)"
+	@echo "  make run         Run the scraper with INPUT=$(INPUT) or URL=$(URL), OUTPUT=$(OUTPUT), FORMAT=$(FORMAT), DEEP=$(DEEP)"
 	@echo "  make test        Run the scraper against sample-urls.txt"
 	@echo "  make test-sample Run the scraper against sample-urls.txt"
 	@echo "  make clean       Remove generated CSV files"
@@ -34,9 +35,9 @@ shell:
 run:
 	@if [ -n "$(URL)" ]; then \
 		if [ -n "$(OUTPUT)" ]; then \
-			$(COMPOSE) run --rm scraper python scraper.py $(URL) --output $(OUTPUT) --format $(FORMAT); \
+			$(COMPOSE) run --rm scraper python scraper.py $(URL) --output $(OUTPUT) --format $(FORMAT) --deep $(DEEP); \
 		else \
-			$(COMPOSE) run --rm scraper python scraper.py $(URL) --format $(FORMAT); \
+			$(COMPOSE) run --rm scraper python scraper.py $(URL) --format $(FORMAT) --deep $(DEEP); \
 		fi; \
 	else \
 		if [ -n "$(OUTPUT)" ]; then \

@@ -345,6 +345,7 @@ PAGE_RULES = [
 
 CSV_FIELD_ORDER = [
     "source_url",
+    "valid",
     "week",
     "bible_chapters",
     "song_1",
@@ -737,6 +738,7 @@ async def scrape_url(page, url: str) -> dict[str, str]:
     except Exception as exc:  # noqa: BLE001
         row["error"] = str(exc)
 
+    row["valid"] = is_valid_row(row)
     return row
 
 
@@ -755,6 +757,39 @@ async def crawl(urls: list[str]) -> list[dict[str, str]]:
                 rows.append(await scrape_url(page, url))
             finally:
                 await page.close()
+
+        await browser.close()
+
+    return rows
+
+
+async def crawl_deep(start_url: str, depth: int) -> list[dict[str, str]]:
+    async with async_playwright() as playwright:
+        browser = await playwright.chromium.launch(
+            headless=True,
+            args=["--no-sandbox", "--disable-dev-shm-usage"],
+        )
+        context = await browser.new_context(user_agent=USER_AGENT)
+
+        rows = []
+        seen = set()
+        current_url = start_url
+        for _ in range(depth):
+            if current_url in seen:
+                break
+            seen.add(current_url)
+
+            page = await context.new_page()
+            try:
+                row = await scrape_url(page, current_url)
+            finally:
+                await page.close()
+
+            rows.append(row)
+            next_url = row.get("next_week_page", "").strip()
+            if not next_url:
+                break
+            current_url = next_url
 
         await browser.close()
 
@@ -781,6 +816,12 @@ def parse_args() -> argparse.Namespace:
         default="csv",
         help="Output format to write (default: csv).",
     )
+    parser.add_argument(
+        "--deep",
+        type=int,
+        default=1,
+        help="Number of linked pages to parse for a single direct URL (1-50, default: 1).",
+    )
     return parser.parse_args()
 
 
@@ -792,6 +833,14 @@ def collect_urls(args: argparse.Namespace) -> list[str]:
     if not urls:
         raise SystemExit("Provide --urls FILE or one or more direct URLs.")
     return urls
+
+
+def collect_direct_url(args: argparse.Namespace) -> str:
+    if args.urls_file:
+        raise SystemExit("--deep can only be used with a direct URL, not with --urls.")
+    if len(args.urls) != 1:
+        raise SystemExit("--deep can only be used with one direct URL.")
+    return args.urls[0]
 
 
 def is_valid_row(row: dict[str, str]) -> bool:
@@ -821,27 +870,31 @@ def write_json_stdout(rows: list[dict[str, str]]) -> None:
 
 def main() -> None:
     args = parse_args()
-    urls = collect_urls(args)
-    rows = asyncio.run(crawl(urls))
-    valid_rows = []
-    skipped = 0
-    for row in rows:
-        if is_valid_row(row):
-            valid_rows.append(row)
-        else:
-            skipped += 1
+    if not 1 <= args.deep <= 50:
+        raise SystemExit("--deep must be between 1 and 50.")
+
+    if args.deep > 1:
+        start_url = collect_direct_url(args)
+        rows = asyncio.run(crawl_deep(start_url, args.deep))
+        rows_to_write = rows
+    else:
+        urls = collect_urls(args)
+        rows = asyncio.run(crawl(urls))
+        rows_to_write = [row for row in rows if is_valid_row(row)]
+
+    skipped = sum(1 for row in rows if not is_valid_row(row))
     if args.output:
         output_path = Path(args.output)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         if args.format == "csv":
-            write_csv(valid_rows, output_path)
+            write_csv(rows_to_write, output_path)
         else:
-            write_json(valid_rows, output_path)
+            write_json(rows_to_write, output_path)
     else:
         if args.format == "csv":
-            write_csv_stdout(valid_rows)
+            write_csv_stdout(rows_to_write)
         else:
-            write_json_stdout(valid_rows)
+            write_json_stdout(rows_to_write)
     print(f"Skipped {skipped} invalid URL(s).", file=sys.stderr)
 
 
