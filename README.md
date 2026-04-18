@@ -39,6 +39,7 @@ make stop
 - Use `FORMAT=json` with `make run` when you want JSON output from the CLI.
 - Use `FORMAT=gdoc-tesori` when you want the Google Docs-friendly CSV layout.
 - In `gdoc-tesori`, the `gems` cell appends only the timing label from `gems_notes`, for example `2. Gemme spirituali (10 min)`.
+- In `gdoc-tesori`, the `treasures` cell appends only the timing label from `treasures_note`, for example `1. La bellezza del nostro paradiso spirituale (10 min)`.
 - In `gdoc-tesori`, `song_1`, `song_2`, and `song_3` keep only the song number.
 - In `gdoc-tesori`, each `living_*_note` keeps only the first sentence, up to the first period.
 - In `gdoc-tesori`, `study_material` removes the leading timing label when it is not `(30 min)`.

@@ -20,6 +20,7 @@ Applied decisions for the current scraper behavior:
 - Use section headings and nearby related content blocks as the primary extraction anchors instead of absolute xpaths.
 - For each meeting part, collect the related text from nearby sibling blocks until the next `h3` or `h2` boundary.
 - Keep `song_2` separate from the `living_*` slots.
+- Add `treasures_note` as the related-content block immediately after the first section-1 part heading.
 - For variable section groups, keep fixed-width columns up to the documented maximum and leave missing slots empty.
 - For note fields, aggregate all related non-heading blocks for the current part until the next heading boundary.
 - Skip a page when any of `section_1`, `section_2`, or `section_3` is missing or empty, and report the number of skipped URLs.
@@ -113,6 +114,7 @@ Field rules:
 - `song_1`: first heading in the article that contains a `Cantico`
 - `section_1`: `h2` containing `TESORI DELLA PAROLA DI DIO`
 - `treasures`: first `h3` inside section 1
+- `treasures_note`: related content after the `treasures` heading until the next heading
 - `gems`: second `h3` inside section 1
 - `gems_notes`: related content after the `gems` heading until the next heading
 - `reading`: third `h3` inside section 1

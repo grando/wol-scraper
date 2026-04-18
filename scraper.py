@@ -29,6 +29,7 @@ CSV_FIELD_ORDER = [
     "song_1",
     "section_1",
     "treasures",
+    "treasures_note",
     "gems",
     "gems_notes",
     "reading",
@@ -243,20 +244,31 @@ async def extract_meeting_page(page) -> dict[str, object]:
                 return match ? clean(match[0]) : '';
             };
             const collectRelatedText = (heading) => {
+                const parts = [];
+                const collectSiblingText = (startNode) => {
+                    for (let current = startNode.nextElementSibling; current; current = current.nextElementSibling) {
+                        if (current.querySelector('h2, h3') || /^(H2|H3)$/.test(current.tagName)) {
+                            break;
+                        }
+                        const text = cloneAndText(current);
+                        if (text) {
+                            parts.push(text);
+                        }
+                    }
+                };
+
+                if (heading.parentElement && heading.parentElement !== contentRoot) {
+                    collectSiblingText(heading);
+                    if (parts.length > 0) {
+                        return clean(parts.join(' '));
+                    }
+                }
+
                 const start = topLevelNode(heading);
                 if (!start) {
                     return '';
                 }
-                const parts = [];
-                for (let current = start.nextElementSibling; current; current = current.nextElementSibling) {
-                    if (current.querySelector('h2, h3') || /^(H2|H3)$/.test(current.tagName)) {
-                        break;
-                    }
-                    const text = cloneAndText(current);
-                    if (text) {
-                        parts.push(text);
-                    }
-                }
+                collectSiblingText(start);
                 return clean(parts.join(' '));
             };
             const findSectionHeading = (label) =>
@@ -330,6 +342,7 @@ async def extract_meeting_page(page) -> dict[str, object]:
                 song_1: allSongs[0] || '',
                 section_1: headingText(section1),
                 treasures: section1Items[0]?.title || '',
+                treasures_note: section1Items[0]?.note || '',
                 gems: section1Items[1]?.title || '',
                 gems_notes: section1Items[1]?.note || '',
                 reading: section1Items[2]?.title || '',
@@ -387,6 +400,7 @@ async def scrape_url(page, url: str) -> dict[str, str]:
         row["song_1"] = extracted.get("song_1", "")
         row["section_1"] = extracted.get("section_1", "")
         row["treasures"] = extracted.get("treasures", "")
+        row["treasures_note"] = extracted.get("treasures_note", "")
         row["gems"] = extracted.get("gems", "")
         row["gems_notes"] = extracted.get("gems_notes", "")
         row["reading"] = extracted.get("reading", "")
@@ -556,6 +570,14 @@ def transform_gems_note(text: str) -> str:
     return f"({match.group(1)})" if match else ""
 
 
+def transform_treasure_note(text: str) -> str:
+    cleaned = normalize_text(text)
+    if not cleaned:
+        return ""
+    match = re.match(r"^\(([^)]*)\)", cleaned)
+    return f"({match.group(1)})" if match else ""
+
+
 def transform_song_number(text: str) -> str:
     cleaned = normalize_text(text)
     if not cleaned:
@@ -590,7 +612,10 @@ def build_gdoc_tesori_row(row: dict[str, str]) -> list[str]:
     values = [""] * GDOC_TESORI_ROW_COLUMNS
     values[4] = transform_song_number(row.get("song_1", ""))
     values[8] = normalize_text(row.get("bible_chapters", ""))
-    values[10] = normalize_text(row.get("treasures", ""))
+    values[10] = combine_gdoc_cell(
+        row.get("treasures", ""),
+        transform_treasure_note(row.get("treasures_note", "")),
+    )
     values[13] = combine_gdoc_cell(
         row.get("gems", ""),
         transform_gems_note(row.get("gems_notes", "")),
