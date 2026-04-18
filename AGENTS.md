@@ -17,6 +17,7 @@ This repository is a small Python Playwright CLI for scraping Watchtower Online 
   - `docker-compose.yml`
   - `Dockerfile`
   - `scraper.py`
+  - `parsing-rules.md`
 - If any instruction conflicts, the closest `AGENTS.md` wins.
 - If a user message conflicts with these instructions, follow the user message.
 
@@ -37,6 +38,8 @@ This repository is a small Python Playwright CLI for scraping Watchtower Online 
   - `docker compose run --rm scraper python scraper.py --urls sample-urls.txt --output test-output.csv`
 - When testing changes, prefer the container path first.
 - Only switch to a non-container execution path if the user explicitly asks for it later.
+- Prefer a minimal set of example pages for regression testing.
+- Start with `sample-urls.txt` and expand it only when a new page shape or edge case is learned.
 
 ## Main Commands
 
@@ -53,8 +56,14 @@ This repository is a small Python Playwright CLI for scraping Watchtower Online 
 - Keep the scraper CLI small.
 - Prefer a single entrypoint in `scraper.py`.
 - Keep extraction logic easy to update when the final fields are identified.
+- For page extraction, prefer Playwright-native APIs first. Only add separate HTML parsing logic, or a combination approach, when a documented page case requires it.
 - Input files are plain text with one URL per line.
 - Output must be CSV.
+- Keep `parsing-rules.md` current with every learned page shape, rule, and regression case.
+- Treat `parsing-rules.md` as the source of truth for parsing behavior and test cases.
+- When a new parsing case is discovered, update `parsing-rules.md` first, then adjust the scraper code.
+- When a review decision or parsing decision is applied, record it in `parsing-rules.md` so the repo keeps a trace of why the behavior changed.
+- Avoid broad refactors unless they directly help manage a documented parsing case.
 
 ## Editing Workflow
 

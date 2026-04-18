@@ -3,7 +3,7 @@ import asyncio
 import csv
 from pathlib import Path
 
-from playwright.async_api import async_playwright
+from playwright.async_api import TimeoutError, async_playwright
 
 
 USER_AGENT = (
@@ -13,7 +13,6 @@ USER_AGENT = (
 )
 NAVIGATION_TIMEOUT_MS = 120000
 CONTENT_READY_TIMEOUT_MS = 60000
-SETTLE_TIMEOUT_MS = 1000
 
 # Edit these selectors when you identify the exact fields to extract.
 CONTENT_SELECTORS = [
@@ -34,47 +33,19 @@ def read_urls(path: Path) -> list[str]:
 
 async def first_text(page, selectors: list[str]) -> str:
     for selector in selectors:
-        locator = page.locator(selector)
-        if await locator.count():
-            text = (await locator.first.inner_text()).strip()
+        try:
+            text = (await page.locator(selector).first.inner_text(timeout=3000)).strip()
             if text:
                 return text
+        except Exception:  # noqa: BLE001
+            pass
+        try:
+            text = (await page.locator(selector).first.text_content(timeout=3000) or "").strip()
+            if text:
+                return text
+        except Exception:  # noqa: BLE001
+            continue
     return ""
-
-
-async def body_text(page) -> str:
-    text = await page.evaluate(
-        """() => {
-            const body = document.body;
-            const text = body ? (body.innerText || body.textContent || "") : "";
-            return text ? text.trim() : "";
-        }"""
-    )
-    return text
-
-
-async def accessibility_text(page) -> str:
-    try:
-        snapshot = await page.accessibility.snapshot(interesting_only=False)
-    except Exception:  # noqa: BLE001
-        return ""
-
-    def collect(node) -> list[str]:
-        if not node:
-            return []
-
-        parts = []
-        name = (node.get("name") or "").strip()
-        value = node.get("value")
-        if name:
-            parts.append(name)
-        if isinstance(value, str) and value.strip() and value.strip() != name:
-            parts.append(value.strip())
-        for child in node.get("children") or []:
-            parts.extend(collect(child))
-        return parts
-
-    return "\n".join(part for part in collect(snapshot) if part).strip()
 
 
 async def scrape_url(page, url: str) -> dict[str, str]:
@@ -86,9 +57,12 @@ async def scrape_url(page, url: str) -> dict[str, str]:
     }
 
     try:
-        await page.goto(url, wait_until="commit", timeout=NAVIGATION_TIMEOUT_MS)
         try:
-            await page.locator("h1").first.wait_for(timeout=CONTENT_READY_TIMEOUT_MS)
+            await page.goto(url, wait_until="domcontentloaded", timeout=NAVIGATION_TIMEOUT_MS)
+        except TimeoutError:
+            await page.goto(url, wait_until="commit", timeout=NAVIGATION_TIMEOUT_MS)
+        try:
+            await page.locator("body").first.wait_for(timeout=CONTENT_READY_TIMEOUT_MS)
         except Exception:  # noqa: BLE001
             pass
         try:
@@ -98,12 +72,21 @@ async def scrape_url(page, url: str) -> dict[str, str]:
             )
         except Exception:  # noqa: BLE001
             pass
-        await page.wait_for_timeout(SETTLE_TIMEOUT_MS)
         row["title"] = await page.title()
+        try:
+            body_text = (await page.inner_text("body", timeout=3000)).strip()
+        except Exception:  # noqa: BLE001
+            body_text = (
+                await page.evaluate(
+                    """() => {
+                        const body = document.body;
+                        return body ? (body.innerText || "").trim() : "";
+                    }"""
+                )
+            ).strip()
         row["content"] = (
-            await accessibility_text(page)
-            or await body_text(page)
-            or await first_text(page, CONTENT_SELECTORS)
+            await first_text(page, CONTENT_SELECTORS)
+            or body_text
         )
     except Exception as exc:  # noqa: BLE001
         row["error"] = str(exc)
@@ -118,17 +101,22 @@ async def crawl(urls: list[str], output_path: Path) -> None:
             args=["--disable-http2", "--no-sandbox", "--disable-dev-shm-usage"],
         )
         context = await browser.new_context(user_agent=USER_AGENT)
-        page = await context.new_page()
 
         rows = []
         for url in urls:
-            rows.append(await scrape_url(page, url))
+            print(f"Scraping {url} ...", flush=True)
+            page = await context.new_page()
+            try:
+                rows.append(await scrape_url(page, url))
+            finally:
+                await page.close()
 
         await browser.close()
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=["source_url", "title", "content", "error"])
+        fieldnames = list(rows[0].keys()) if rows else ["source_url", "title", "content", "error"]
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
 

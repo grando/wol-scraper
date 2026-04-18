@@ -21,4 +21,5 @@ make stop
 
 - Run everything in Docker.
 - Use `make` for the main workflow.
+- Extraction prefers Playwright-native rendered-page APIs first.
 - Update `scraper.py` when the final fields are defined.
