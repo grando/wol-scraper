@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  scraper:
+    build: .
+    container_name: playwright_scraper
+    volumes:
+      - ./:/app
+    working_dir: /app
+    command: tail -f /dev/null  # Keep the container running without exiting    
+  
